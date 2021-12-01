@@ -1,36 +1,42 @@
 import React from "react";
 
 import {
-  Icon,
-  Text,
-  Stack,
-  Tag,
   VStack,
-  Flex,
-  Spacer,
   useColorModeValue,
-  StackDivider,
-  Progress,
   HStack,
-  Avatar,
-  Image,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Link,
   Button,
+  Input,
+  Modal,
+  ModalOverlay,
+  ModalHeader,
+  ModalCloseButton,
+  ModalContent,
+  ModalBody,
+  ModalFooter,
+  Textarea,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { FiMenu, FiTrash2, FiHeart } from "react-icons/fi";
-import { MdFavorite, MdModeComment } from "react-icons/md";
+import { FiImage, FiVideo } from "react-icons/fi";
 import { useNavigate } from "react-router";
+import { Post, PostAvatar } from "../components/posts";
+import posts from "../data/posts";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleClick = () => {
-    navigate("/debt");
+  // const handleClick = () => {
+  //   navigate("/debt");
+  // };
+
+  const onPostClick = (event) => {
+    event.target.blur();
+    onOpen();
   };
 
   const bg = useColorModeValue("white", "gray.700");
@@ -38,87 +44,78 @@ const MainPage = () => {
 
   return (
     <>
-      <VStack alignItems="stretch" maxW={590} mx="auto" spacing={5}>
-        {[...Array(20).keys()].map((i) => (
-          <VStack
-            key={i}
-            bg={bg}
-            _hover={{
-              bg: bgHover,
-              borderColor: "gray.400",
-            }}
-            // borderWidth="1px"
-            // borderColor="gray.300"
-            rounded="lg"
-            alignItems="stretch"
-            shadow="base"
-            spacing={2}
-          >
-            <HStack px={4} pt={3}>
-              <Avatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
-              <VStack spacing={0} alignItems="start" flex={1}>
-                <Text fontWeight="bold">Jonathan Toledo Orobia</Text>
-                <Text fontSize="xs">1 hour ago</Text>
-              </VStack>
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  aria-label="Options"
-                  icon={<FiMenu />}
-                  variant="outline"
-                />
-                <MenuList>
-                  <MenuItem icon={<FiTrash2 />}>Delete</MenuItem>
-                </MenuList>
-              </Menu>
-            </HStack>
-            <Text px={4}>
-              Placerat sapien parturient nec hac maecenas lacus eu nulla,
-              vestibulum quisque suscipit netus dis posuere erat primis vitae,
-              molestie neque mauris curae ullamcorper natoque consequat.
-            </Text>
-            <Image
-              objectFit="cover"
-              src="https://via.placeholder.com/500x400.png"
-              alt="Post Image"
-              maxH={300}
-            />
-            <VStack
-              px={4}
-              pb={3}
-              alignItems="stretch"
-              divider={<StackDivider borderColor="gray.200" />}
-            >
-              <HStack alignItems="flex-end">
-                <HStack>
-                  <Icon as={MdFavorite} color="red.500" boxSize="1.2em" />
-                  <Text fontSize="sm">45</Text>
-                </HStack>
-                <Spacer />
-                <Link fontSize="sm">23 comments</Link>
-              </HStack>
-              <HStack>
+      <Modal onClose={onClose} isOpen={isOpen} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create post</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4} alignItems="stretch">
+              <Textarea
+                resize="none"
+                size="lg"
+                rows={5}
+                placeholder="What's on your mind, Jonathan?"
+              />
+              <HStack alignItems="stretch">
                 <Button
-                  leftIcon={<MdFavorite />}
-                  colorScheme="teal"
-                  variant="ghost"
-                  size="sm"
                   flex={1}
+                  rightIcon={<FiImage />}
+                  colorScheme="gray"
+                  variant="outline"
+                  color="gray.600"
                 >
-                  Like
+                  Image
                 </Button>
                 <Button
-                  leftIcon={<MdModeComment />}
-                  colorScheme="teal"
-                  variant="ghost"
-                  size="sm"
                   flex={1}
+                  rightIcon={<FiVideo />}
+                  colorScheme="gray"
+                  variant="outline"
+                  color="gray.600"
                 >
-                  Comment
+                  Video
                 </Button>
               </HStack>
             </VStack>
-          </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="primary" mr="2">
+              Post
+            </Button>
+            <Button onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <VStack alignItems="stretch" maxW={590} mx="auto" spacing={5}>
+        <VStack
+          bg={bg}
+          _hover={{
+            bg: bgHover,
+            borderColor: "gray.400",
+          }}
+          // borderWidth="1px"
+          // borderColor="gray.300"
+          rounded="lg"
+          alignItems="stretch"
+          shadow="base"
+          spacing={2}
+          px={4}
+          py={3}
+        >
+          <HStack>
+            <PostAvatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
+            <Input
+              onClick={onPostClick}
+              variant="filled"
+              borderRadius="full"
+              placeholder="What's on your mind, Jonathan?"
+            />
+          </HStack>
+        </VStack>
+
+        {posts.map((p) => (
+          <Post key={p.id} post={p} />
         ))}
       </VStack>
     </>

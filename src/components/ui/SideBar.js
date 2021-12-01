@@ -17,7 +17,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import { FiHome, FiTrendingUp, FiMenu, FiLogOut } from "react-icons/fi";
+import { FiHome, FiTrendingUp, FiMenu, FiLogOut, FiUser } from "react-icons/fi";
 import { signOut } from "../../backend/auth";
 
 const SideBar = ({ children }) => {
@@ -45,7 +45,7 @@ const SideBar = ({ children }) => {
       </Drawer>
 
       <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} p="4">
+      <Box ml={{ base: 0, md: 60 }} px={4} pb={4} pt={{ base: "24", md: "4" }}>
         {children}
       </Box>
     </Box>
@@ -83,7 +83,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
       <NavItem to="/" key="Home" icon={FiHome}>
         Home
       </NavItem>
-      <NavItem to="/" key="Projection" icon={FiTrendingUp}>
+      <NavItem to="/" key="Profile" icon={FiUser}>
         Profile
       </NavItem>
       <NavItem onClick={handleSignOut} key="Sign Out" icon={FiLogOut}>
@@ -186,8 +186,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
         icon={<FiMenu />}
       />
 
-      <Text fontSize="2xl" ml="8" fontFamily="monospace" fontWeight="bold">
-        Debts
+      <Text fontSize="2xl" ml="8" fontWeight="bold">
+        Social
       </Text>
     </Flex>
   );
