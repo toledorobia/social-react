@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
-import { VStack, HStack, Input, Link } from "@chakra-ui/react";
+import { VStack, HStack, Input, Link, Textarea } from "@chakra-ui/react";
+import PostCommentForm from "./PostCommentForm";
 import PostAvatar from "./PostAvatar";
 import PostComment from "./PostComment";
 
-const PostComments = ({ postId, comments, ...props }) => {
+const PostComments = ({ postId, comments, forceFocus, ...props }) => {
   const [number, setNumber] = useState(2);
 
   const _comments = useMemo(() => {
@@ -18,18 +19,14 @@ const PostComments = ({ postId, comments, ...props }) => {
   return (
     <>
       <VStack spacing={3} alignItems="stretch">
-        <HStack>
+        <HStack alignItems="start">
           <PostAvatar
             size="sm"
+            alignSelf="center"
             name="Dan Abrahmov"
             src="https://bit.ly/dan-abramov"
           />
-          <Input
-            size="sm"
-            variant="filled"
-            borderRadius="full"
-            placeholder="Write a comment..."
-          />
+          <PostCommentForm postId={postId} forceFocus={forceFocus} />
         </HStack>
         {_comments.map((comment) => (
           <PostComment key={comment.id} comment={comment} />
@@ -53,6 +50,7 @@ const PostComments = ({ postId, comments, ...props }) => {
 PostComments.propTypes = {
   postId: PropTypes.string.isRequired,
   comments: PropTypes.arrayOf(PropTypes.object).isRequired,
+  forceFocus: PropTypes.number.isRequired,
 };
 
 export default PostComments;

@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import PropTypes from "prop-types";
 
 import {
@@ -13,17 +13,29 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { MdFavorite, MdModeComment } from "react-icons/md";
+import { randomNumber } from "../../libs/helpers";
 import PostComments from "./PostComments";
 
 const PostSocial = ({ postId, comments, likes, ...props }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [forceFocus, setForceFocus] = useState(0);
 
   const toggleComments = () => {
     if (isOpen) {
       onClose();
     } else {
+      setForceFocus(0);
       onOpen();
     }
+  };
+
+  const forceComment = () => {
+    // if (!isOpen) {
+    setForceFocus(randomNumber(1, 10000));
+    if (!isOpen) {
+      onOpen();
+    }
+    // }
   };
 
   return (
@@ -35,7 +47,7 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
         divider={<StackDivider borderColor="gray.200" />}
       >
         <HStack alignItems="flex-end">
-          <HStack>
+          <HStack spacing={1}>
             <Icon as={MdFavorite} color="red.500" boxSize="1.2em" />
             <Text fontSize="sm">{likes.length}</Text>
           </HStack>
@@ -56,6 +68,7 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
             Like
           </Button>
           <Button
+            onClick={forceComment}
             leftIcon={<MdModeComment />}
             colorScheme="gray"
             variant="ghost"
@@ -66,7 +79,13 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
             Comment
           </Button>
         </HStack>
-        {isOpen && <PostComments comments={comments} postId={postId} />}
+        {isOpen && (
+          <PostComments
+            comments={comments}
+            postId={postId}
+            forceFocus={forceFocus}
+          />
+        )}
       </VStack>
     </>
   );

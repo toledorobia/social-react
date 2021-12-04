@@ -83,7 +83,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
       <NavItem to="/" key="Home" icon={FiHome}>
         Home
       </NavItem>
-      <NavItem to="/" key="Profile" icon={FiUser}>
+      <NavItem to="/profile" key="Profile" icon={FiUser}>
         Profile
       </NavItem>
       <NavItem onClick={handleSignOut} key="Sign Out" icon={FiLogOut}>

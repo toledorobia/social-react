@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
-import { firebaseClearUser } from "./libs/helpers";
 
 import { signIn } from "./features/auth/authSlice";
 import { snapshotAuthState, signOut } from "./backend/auth";
@@ -13,7 +12,7 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import MainPage from "./pages/MainPage";
-import DebtFormPage from "./pages/DebtFormPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -25,7 +24,7 @@ const App = () => {
       if (user != null && !user.emailVerified) {
         await signOut();
       } else {
-        dispatch(signIn(firebaseClearUser(user)));
+        dispatch(signIn(user));
       }
     });
 
@@ -57,8 +56,8 @@ const App = () => {
     <>
       <SideBar>
         <Routes>
+          <Route path="/profile" element={<ProfilePage />}></Route>
           <Route path="/" element={<MainPage />}></Route>
-          <Route path="/debt" element={<DebtFormPage />}></Route>
         </Routes>
       </SideBar>
     </>

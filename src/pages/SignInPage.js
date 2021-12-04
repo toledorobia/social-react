@@ -1,5 +1,5 @@
 import React from "react";
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import {
@@ -21,12 +21,16 @@ const FormSchema = Yup.object().shape({
 
 const SignInPage = () => {
   const toast = useToast();
+  const navigate = useNavigate();
 
   const submit = async (values) => {
     const { email, password, remember } = values;
     try {
+      // TODO: fix if user didn't validate email.
       await signIn(email, password, remember);
+      // navigate("/", { replace: true });
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: error.message,
