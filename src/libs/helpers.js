@@ -37,7 +37,6 @@ export const firebaseClearError = (error) => {
 };
 
 export const firebaseTimestampToDates = (doc) => {
-  console.log(doc);
   if (isSomething(doc.createdAt)) {
     doc.createdAt = doc.createdAt.toDate();
   }
@@ -65,6 +64,12 @@ export const randomNumber = (min, max) => {
 
 export const firebaseDateNow = () => {
   return Timestamp.fromDate(new Date());
+};
+
+export const isEmptyString = (str) => {
+  return (
+    _.isUndefined(str) || _.isNull(str) || !_.isString(str) || str.length === 0
+  );
 };
 
 export const isNothing = (obj) => {

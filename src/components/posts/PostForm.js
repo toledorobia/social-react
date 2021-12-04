@@ -27,7 +27,9 @@ import {
   imageValidation,
   imageProcessing,
   generateUniqueId,
+  isEmptyString,
 } from "../../libs/helpers";
+import { newPost } from "../../backend/posts";
 import { uploadImage } from "../../backend/storage";
 import mime from "mime-types";
 
@@ -35,12 +37,15 @@ import PostAvatar from "./PostAvatar";
 
 const PostForm = (props) => {
   const toast = useToast();
-  const [loading, setLoading] = useBoolean(false);
-  const [posting, setPosting] = useBoolean(false);
+  const refInputContent = useRef(null);
   const refInputImage = useRef(null);
-  const [imageUrl, setImageUrl] = useState(null);
   const user = useSelector((state) => state.auth.user);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [loading, setLoading] = useBoolean(false);
+  const [posting, setPosting] = useBoolean(false);
+  const [uploading, setUploading] = useBoolean(false);
+  const [imageUrl, setImageUrl] = useState(null);
   const bg = useColorModeValue("white", "gray.700");
   const bgHover = useColorModeValue("white", "gray.700");
 
@@ -60,6 +65,7 @@ const PostForm = (props) => {
   const onUploadImage = useCallback(
     async (e) => {
       setLoading.on();
+      setUploading.on();
 
       try {
         const files = e.target.files || e.dataTransfer.files;
@@ -94,15 +100,52 @@ const PostForm = (props) => {
         });
       } finally {
         setLoading.off();
+        setUploading.off();
       }
     },
-    [toast, setLoading]
+    [setLoading, setUploading, toast]
   );
 
-  const onSubmit = useCallback(async (e) => {
-    setLoading.on();
-    setPosting.on();
-  });
+  const onSubmit = useCallback(
+    async (e) => {
+      try {
+        setLoading.on();
+        setPosting.on();
+
+        const content = refInputContent.current.innerText;
+        if (isEmptyString(content) && isEmptyString(imageUrl)) {
+          throw new Error("Content or image is required");
+        }
+
+        console.log("new post", user.uid, content, imageUrl);
+
+        await newPost(user.uid, content, imageUrl);
+        onClose();
+
+        toast({
+          title: "Success",
+          description: "Post has been created",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } catch (e) {
+        toast({
+          title: "Error",
+          description: e,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading.off();
+        setPosting.off();
+      }
+
+      console.log(refInputContent.current.innerText);
+    },
+    [imageUrl, onClose, setLoading, setPosting, toast, user.uid]
+  );
 
   return (
     <>
@@ -125,7 +168,8 @@ const PostForm = (props) => {
                 placeholder="What's on your mind, Jonathan?"
               /> */}
               <Box
-                contentEditable={true}
+                contentEditable={!loading}
+                ref={refInputContent}
                 w="100%"
                 maxW="100%"
                 minH="100px"
@@ -163,7 +207,8 @@ const PostForm = (props) => {
                   <Button
                     flex={1}
                     onClick={onClickInputImage}
-                    isLoading={loading}
+                    isLoading={uploading}
+                    isDisabled={loading}
                     rightIcon={<FiImage />}
                     colorScheme="gray"
                     variant="outline"

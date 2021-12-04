@@ -1,7 +1,7 @@
 import faker from "faker";
 
 const post = [];
-const types = ["empty", "text", "image", "video"];
+const types = ["empty", "text", "image"];
 const videos = [
   "0F0CAEoF4XM",
   "GuJQSAiODqI",

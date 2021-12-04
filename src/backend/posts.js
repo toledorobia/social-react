@@ -1,115 +1,89 @@
 import {
-  getAuth,
-  setPersistence,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut as signOutFirebase,
-  browserLocalPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
-import {
   getFirestore,
   doc,
   setDoc,
   getDoc,
-  updateDoc,
+  addDoc,
+  collection,
+  where,
+  orderBy,
+  query,
+  getDocs,
+  onSnapshot,
 } from "firebase/firestore";
-
-import { firebaseDateNow, firebaseTimestampToDates } from "../libs/helpers";
+import { firebaseDateNow, firebaseDocToObject } from "../libs/helpers";
 import _ from "lodash";
 
-export const snapshotAuthState = (callback) => {
-  const auth = getAuth();
+export const snapshotPostsTimeline = (uid, onSuccess, onError) => {
+  const db = getFirestore();
 
-  return onAuthStateChanged(auth, (user) => {
-    if (!_.isFunction(callback)) {
-      return;
-    }
-
-    if (user == null) {
-      callback(null);
-    } else {
-      getFirestoreUser(user.uid).then((userfs) => {
-        if (user.emailVerified === true && userfs.emailVerified === false) {
-          updateFirestoreUser(userfs.uid, { emailVerified: true }).then(() => {
-            userfs.emailVerified = true;
-            callback(user);
-          });
-        } else {
-          callback(userfs);
-        }
-      });
-    }
-  });
-};
-
-export const signIn = (email, password, remember) => {
-  return new Promise((resolve, reject) => {
-    const auth = getAuth();
-
-    setPersistence(
-      remember ? browserLocalPersistence : browserSessionPersistence
-    )
-      .then(() => signInWithEmailAndPassword(auth, email, password))
-      .then((user) => resolve(user))
-      .catch((error) => reject(error));
-  });
-};
-
-export const signUp = async (email, name, password) => {
-  const auth = getAuth();
-  const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
+  const q = query(
+    collection(db, "posts"),
+    // where("uid", "==", uid),
+    orderBy("name")
   );
-  await sendEmailVerification(userCredential.user);
-  await updateProfile(userCredential.user, { displayName: name });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const items = [];
 
-  const uid = userCredential.user.uid;
-  const db = getFirestore();
-  const now = firebaseDateNow();
-  console.log("user", uid);
+      snapshot.forEach((doc) => {
+        items.push(firebaseDocToObject(doc));
+      });
 
-  await setDoc(doc(db, "users", uid), {
-    name: name,
-    email: email,
-    emailVerified: false,
-    photoUrl: null,
-    updateAt: now,
-    createdAt: now,
-  });
-
-  return signOutFirebase(auth);
+      if (_.isFunction(onSuccess)) {
+        onSuccess(items);
+      }
+    },
+    (err) => {
+      if (_.isFunction(onError)) {
+        onError(err);
+      }
+    }
+  );
 };
 
-export const signOut = () => {
-  const auth = getAuth();
-  return signOutFirebase(auth);
-};
-
-export const passwordResetEmail = (email) => {
-  const auth = getAuth();
-  return sendPasswordResetEmail(auth, email);
-};
-
-export const updateFirestoreUser = (uid, data = {}) => {
-  const db = getFirestore();
-  return updateDoc(doc(db, "users", uid), data);
-};
-
-export const getFirestoreUser = (uid) => {
+export const getPostsTimeline = (uid) => {
   return new Promise((resolve, reject) => {
     const db = getFirestore();
-    const docRef = doc(db, "users", uid);
-    getDoc(docRef)
-      .then((docSnap) => {
-        const data = firebaseTimestampToDates(docSnap.data());
-        resolve({ uid: docSnap.id, ...data });
+    const q = query(
+      collection(db, "posts"),
+      // where("uid", "==", uid),
+      orderBy("createdAt", "desc")
+    );
+
+    getDocs(q)
+      .then((querySnapshot) => {
+        const posts = [];
+        querySnapshot.forEach((doc) => {
+          posts.push(firebaseDocToObject(doc));
+        });
+
+        resolve(posts);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const newPost = (uid, content, image = null) => {
+  return new Promise((resolve, reject) => {
+    const now = firebaseDateNow();
+    const db = getFirestore();
+
+    addDoc(collection(db, "posts"), {
+      uid,
+      content,
+      image,
+      video: null,
+      likes: [],
+      comments: [],
+      createdAt: now,
+      updatedAt: now,
+    })
+      .then((docRef) => {
+        resolve({ id: docRef.id });
       })
       .catch((error) => resolve(error));
   });

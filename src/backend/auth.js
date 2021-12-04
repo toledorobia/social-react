@@ -52,6 +52,7 @@ export const signIn = (email, password, remember) => {
     const auth = getAuth();
 
     setPersistence(
+      auth,
       remember ? browserLocalPersistence : browserSessionPersistence
     )
       .then(() => signInWithEmailAndPassword(auth, email, password))
@@ -73,7 +74,6 @@ export const signUp = async (email, name, password) => {
   const uid = userCredential.user.uid;
   const db = getFirestore();
   const now = firebaseDateNow();
-  console.log("user", uid);
 
   await setDoc(doc(db, "users", uid), {
     name: name,

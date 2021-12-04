@@ -16,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
   const loaded = useSelector((state) => state.auth.loaded);
   const logged = useSelector((state) => state.auth.logged);
 
@@ -32,6 +33,12 @@ const App = () => {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (user == null) {
+      
+    }
+  }, [user.uid]);
 
   if (!loaded) {
     return <LoadingPage />;
