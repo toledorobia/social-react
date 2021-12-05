@@ -19,7 +19,11 @@ const PostComment = ({ comment, ...props }) => {
   return (
     <>
       <HStack spacing={2} alignItems="start">
-        <PostAvatar size="sm" src={comment.user.avatar} />
+        <PostAvatar
+          size="sm"
+          src={comment.user.photoUrl}
+          name={comment.user.name}
+        />
         <VStack flex={1} spacing={0} alignItems="stretch">
           <VStack
             spacing={0}

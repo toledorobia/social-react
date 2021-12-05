@@ -11,6 +11,14 @@ import {
   HStack,
   Link,
   Button,
+  Avatar,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
   useDisclosure,
 } from "@chakra-ui/react";
 import { MdFavorite, MdModeComment } from "react-icons/md";
@@ -54,7 +62,29 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
         <HStack alignItems="flex-end">
           <HStack spacing={1}>
             <Icon as={MdFavorite} color="red.500" boxSize="1.2em" />
-            <Text fontSize="sm">{likes.length}</Text>
+            <Popover isLazy closeOnBlur>
+              <PopoverTrigger>
+                <Link fontSize="sm">{likes.length}</Link>
+              </PopoverTrigger>
+              <PopoverContent _focus={{ outline: 0, boxShadow: 0 }}>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverBody>
+                  <VStack alignItems="start">
+                    {likes.map((l) => (
+                      <HStack>
+                        <Avatar
+                          size="2xs"
+                          name={l.user.name}
+                          src={l.user.photoUrl}
+                        />
+                        <Text fontSize="sm">{l.user.name}</Text>
+                      </HStack>
+                    ))}
+                  </VStack>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
           </HStack>
           <Spacer />
           <Link fontSize="sm" onClick={toggleComments}>

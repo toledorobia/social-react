@@ -1,36 +1,68 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import {
-  Textarea,
-  Editable,
-  EditablePreview,
-  EditableInput,
-  Box,
-  Text,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { useSelector } from "react-redux";
+import { Box, useColorModeValue, useBoolean, useToast } from "@chakra-ui/react";
+
+import { newPostComment } from "../../backend/posts";
+import { isEmptyString } from "../../libs/helpers";
 
 const PostCommentForm = ({ postId, forceFocus, ...props }) => {
-  console.log("PostCommentForm", postId, forceFocus);
+  const user = useSelector((state) => state.auth.user);
+  const toast = useToast();
+  const [loading, setLoading] = useBoolean(false);
   const bg = useColorModeValue("gray.200", "gray.700");
-  const textarea = useRef(null);
+  const refInputContent = useRef(null);
 
   useEffect(() => {
     if (forceFocus !== 0) {
-      textarea.current.focus();
+      refInputContent.current.focus();
     }
   }, [forceFocus]);
 
+  const onSubmit = useCallback(
+    async (e) => {
+      if (!(e.keyCode === 13 && e.shiftKey === false)) {
+        return;
+      }
+
+      setLoading.on();
+      try {
+        const content = refInputContent.current.innerText;
+        refInputContent.current.innerText = "";
+
+        if (isEmptyString(content)) {
+          throw new Error("Comment cannot be empty");
+        }
+
+        await newPostComment(postId, user.uid, content);
+        toast({
+          title: "Success",
+          description: "Comment posted",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } catch (e) {
+        toast({
+          title: "Error",
+          description: e,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading.off();
+      }
+    },
+    [postId, user, setLoading, toast]
+  );
+
   return (
     <>
-      {/* <Editable defaultValue="Take some chakra" w="100%">
-        <EditablePreview />
-        <EditableInput />
-      </Editable> */}
-
       <Box
-        ref={textarea}
-        contentEditable={true}
+        ref={refInputContent}
+        contentEditable={!loading}
+        onKeyDown={onSubmit}
         w="100%"
         maxW="100%"
         overflow="hidden"
@@ -51,19 +83,6 @@ const PostCommentForm = ({ postId, forceFocus, ...props }) => {
           },
         }}
       />
-
-      {/* <Textarea
-        ref={textarea}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        rows={rows}
-        overflow={rows === 1 ? "hidden" : "auto"}
-        resize="none"
-        size="sm"
-        variant="filled"
-        borderRadius="xl"
-        placeholder="Write a comment..."
-      /> */}
     </>
   );
 };

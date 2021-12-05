@@ -9,18 +9,18 @@ import { toggleLike } from "../../backend/posts";
 const PostSocialLike = ({ postId, likes, ...props }) => {
   const [loading, setLoading] = useBoolean(false);
   const user = useSelector((state) => state.auth.user);
-  const like = likes.find((l) => l.uid === user.uid);
+  const isLike = likes.find((l) => l.uid === user.uid) != null;
 
   const handleLike = useCallback(async () => {
     setLoading.on();
     try {
-      await toggleLike(postId, user.uid, like);
+      await toggleLike(postId, user.uid, !isLike);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading.off();
     }
-  }, [setLoading, postId, user.uid, like]);
+  }, [setLoading, postId, user.uid, isLike]);
 
   return (
     <>
@@ -32,9 +32,9 @@ const PostSocialLike = ({ postId, likes, ...props }) => {
         variant="ghost"
         size="sm"
         flex={1}
-        color={like ? "blue.600" : "gray.600"}
+        color={isLike ? "blue.600" : "gray.600"}
       >
-        {like ? "Unlike" : "Like"}
+        {isLike ? "Unlike" : "Like"}
       </Button>
     </>
   );

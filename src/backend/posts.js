@@ -17,6 +17,7 @@ import {
 import { firebaseDateNow, firebaseDocToObject } from "../libs/helpers";
 import _ from "lodash";
 import { normalizeUsers } from "./users";
+import { v4 as uuidv4 } from "uuid";
 
 import store from "../store";
 
@@ -50,7 +51,6 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
       await normalizeUsers(postUsers);
 
       const users = store.getState().users.users;
-
       const posts = items.map((p) => {
         p.user = users.find((u) => u.uid === p.uid);
         p.likes = p.likes.map((l) => {
@@ -58,6 +58,8 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
           return l;
         });
         p.comments = p.comments.map((c) => {
+          c.createdAt = c.createdAt?.toDate();
+          c.updatedAt = c.updatedAt?.toDate();
           c.user = users.find((u) => u.uid === c.uid);
           return c;
         });
@@ -123,46 +125,53 @@ export const newPost = (uid, content, image = null) => {
   });
 };
 
-export const toggleLike = (postId, uid, like = null) => {
-  console.log("toggleLike", postId, uid, like);
+export const toggleLike = (postId, uid, like = false) => {
   return new Promise((resolve, reject) => {
     const now = firebaseDateNow();
     const db = getFirestore();
     const ref = doc(db, "posts", postId);
 
-    getDoc(ref)
-      .then((doc) => {
-        const likes = doc.data().likes;
-        const likesIndex = likes.findIndex((l) => l.uid === uid);
+    getDoc(ref).then((doc) => {
+      const likes = doc.data().likes;
+      const likesIndex = likes.findIndex((l) => l.uid === uid);
 
-        if (like === null) {
-          like = likesIndex === -1;
-        }
+      if (like === true && likesIndex === -1) {
+        likes.push({
+          uid,
+          createdAt: now,
+        });
+      } else if (like === false) {
+        likes.splice(likesIndex, 1);
+      }
 
-        if (like) {
-          likes.push({
-            uid,
-            createdAt: now,
-          });
-        } else {
-          likes.splice(likesIndex, 1);
-        }
-
-        setDoc(ref, {
-          likes,
-          updatedAt: now,
-        })
-          .then(() => {
-            resolve(like);
-          })
-          .catch((error) => {
-            reject(error);
-          });
+      updateDoc(ref, {
+        likes,
       })
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  });
+};
+
+export const newPostComment = (postId, uid, content) => {
+  return new Promise((resolve, reject) => {
+    const now = firebaseDateNow();
+    const db = getFirestore();
+    const ref = doc(db, "posts", postId);
 
     updateDoc(ref, {
-      likes:
-        like == null ? arrayUnion({ uid, createdAt: now }) : arrayRemove(like),
+      comments: arrayUnion({
+        id: uuidv4(),
+        uid,
+        content,
+        likes: [],
+        createdAt: now,
+        updatedAt: null,
+      }),
     })
       .then(() => {
         resolve();

@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 import { VStack, HStack, Input, Link, Textarea } from "@chakra-ui/react";
 import PostCommentForm from "./PostCommentForm";
 import PostAvatar from "./PostAvatar";
 import PostComment from "./PostComment";
 
 const PostComments = ({ postId, comments, forceFocus, ...props }) => {
+  const user = useSelector((state) => state.auth.user);
   const [number, setNumber] = useState(2);
 
   const _comments = useMemo(() => {
@@ -23,8 +25,8 @@ const PostComments = ({ postId, comments, forceFocus, ...props }) => {
           <PostAvatar
             size="sm"
             alignSelf="center"
-            name="Dan Abrahmov"
-            src="https://bit.ly/dan-abramov"
+            name={user.name}
+            src={user.photoUrl}
           />
           <PostCommentForm postId={postId} forceFocus={forceFocus} />
         </HStack>

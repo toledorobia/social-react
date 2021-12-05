@@ -161,12 +161,6 @@ const PostForm = (props) => {
           <ModalCloseButton isDisabled={loading} />
           <ModalBody>
             <VStack spacing={4} alignItems="stretch">
-              {/* <Textarea
-                resize="none"
-                size="lg"
-                rows={5}
-                placeholder="What's on your mind, Jonathan?"
-              /> */}
               <Box
                 contentEditable={!loading}
                 ref={refInputContent}

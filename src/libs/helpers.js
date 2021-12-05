@@ -3,13 +3,11 @@ import mime from "mime-types";
 import { compress, compressAccurately } from "image-conversion";
 import _ from "lodash";
 import cryptojs from "crypto-js";
+import { v4 as uuidv4 } from "uuid";
 
 export const generateUniqueId = (suffix = "") => {
   const id = cryptojs
-    .MD5(
-      new Date().getTime().toString() +
-        (Math.random() + 1).toString(36).substring(7)
-    )
+    .MD5(new Date().getTime().toString() + uuidv4())
     .toString();
   return id + (isSomething(suffix) ? suffix : "");
 };
