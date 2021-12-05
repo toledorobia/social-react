@@ -1,4 +1,5 @@
 import React, { memo, useState } from "react";
+import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
@@ -15,10 +16,14 @@ import {
 import { MdFavorite, MdModeComment } from "react-icons/md";
 import { randomNumber } from "../../libs/helpers";
 import PostComments from "./PostComments";
+import PostSocialLike from "./PostSocialLike";
 
 const PostSocial = ({ postId, comments, likes, ...props }) => {
+  const user = useSelector((state) => state.auth.user);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [forceFocus, setForceFocus] = useState(0);
+
+  const like = likes.find((l) => l.uid === user.uid);
 
   const toggleComments = () => {
     if (isOpen) {
@@ -57,16 +62,7 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
           </Link>
         </HStack>
         <HStack>
-          <Button
-            leftIcon={<MdFavorite />}
-            colorScheme="gray"
-            variant="ghost"
-            size="sm"
-            flex={1}
-            color="gray.600"
-          >
-            Like
-          </Button>
+          <PostSocialLike postId={postId} likes={likes} />
           <Button
             onClick={forceComment}
             leftIcon={<MdModeComment />}

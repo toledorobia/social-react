@@ -19,7 +19,7 @@ const PostHeader = ({ postId, createdAt, user, ...props }) => {
   return (
     <>
       <HStack px={4} pt={3}>
-        <PostAvatar name={user.name} src={user.avatar} />
+        <PostAvatar name={user.name} src={user.photoUrl} />
         <VStack spacing={0} alignItems="start" flex={1}>
           <Text fontWeight="bold">{user.name}</Text>
           <Text fontSize="xs">{dayjs(createdAt).fromNow()}</Text>

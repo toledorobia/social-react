@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 
 import { signIn } from "./features/auth/authSlice";
+import { setPosts } from "./features/posts/postsSlice";
 import { snapshotAuthState, signOut } from "./backend/auth";
+import { snapshotPosts } from "./backend/posts";
 
 import SideBar from "./components/ui/SideBar";
 import LoadingPage from "./pages/LoadingPage";
@@ -36,9 +38,20 @@ const App = () => {
 
   useEffect(() => {
     if (user == null) {
-      
+      dispatch(setPosts([]));
+      return;
     }
-  }, [user.uid]);
+
+    const unsubscribe = snapshotPosts(
+      user.uid,
+      (posts) => {
+        dispatch(setPosts(posts));
+      },
+      (error) => {}
+    );
+
+    return () => unsubscribe();
+  }, [dispatch, user]);
 
   if (!loaded) {
     return <LoadingPage />;
