@@ -31,7 +31,7 @@ const PostComments = ({ postId, comments, forceFocus, ...props }) => {
           <PostCommentForm postId={postId} forceFocus={forceFocus} />
         </HStack>
         {_comments.map((comment) => (
-          <PostComment key={comment.id} comment={comment} />
+          <PostComment key={comment.id} postId={postId} comment={comment} />
         ))}
 
         {number < comments.length && (

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 import {
   Text,
   HStack,
@@ -9,32 +10,76 @@ import {
   MenuList,
   MenuItem,
   IconButton,
+  Link,
+  useBoolean,
+  useToast,
 } from "@chakra-ui/react";
 import { FiMenu, FiTrash2 } from "react-icons/fi";
-
-import dayjs from "../../libs/dayjs";
+import { dateFormat, dateFromNow } from "../../libs/helpers";
 import PostAvatar from "./PostAvatar";
+import MenuItemConfirm from "../ui/MenuItemConfirm";
 
-const PostHeader = ({ postId, createdAt, user, ...props }) => {
+import { deletePost } from "../../backend/posts";
+
+const PostHeader = ({ postId, createdAt, postUser, ...props }) => {
+  const toast = useToast();
+  const user = useSelector((state) => state.auth.user);
+  const [loading, setLoading] = useBoolean(false);
+  const isOwner = user && user.uid === postUser.uid;
+
+  const handleDelete = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+
+    try {
+      setLoading.on();
+      await deletePost(postId);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setLoading.off();
+    }
+  });
+
   return (
     <>
       <HStack px={4} pt={3}>
-        <PostAvatar name={user.name} src={user.photoUrl} />
+        <PostAvatar name={postUser.name} src={postUser.photoUrl} />
         <VStack spacing={0} alignItems="start" flex={1}>
-          <Text fontWeight="bold">{user.name}</Text>
-          <Text fontSize="xs">{dayjs(createdAt).fromNow()}</Text>
+          <Text fontWeight="bold">{postUser.name}</Text>
+          <Link fontSize="xs" title={dateFormat(createdAt)}>
+            {dateFromNow(createdAt)}
+          </Link>
         </VStack>
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<FiMenu />}
-            variant="outline"
-          />
-          <MenuList>
-            <MenuItem icon={<FiTrash2 />}>Delete</MenuItem>
-          </MenuList>
-        </Menu>
+        {isOwner && (
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label="Options"
+              icon={<FiMenu />}
+              variant="outline"
+            />
+            <MenuList>
+              <MenuItemConfirm
+                as={MenuItem}
+                icon={<FiTrash2 />}
+                title="Delete post"
+                message="Are you sure you want to delete this post?"
+                buttonTitle="Delete"
+                onConfirm={handleDelete}
+              >
+                Delete
+              </MenuItemConfirm>
+            </MenuList>
+          </Menu>
+        )}
       </HStack>
     </>
   );
@@ -43,7 +88,7 @@ const PostHeader = ({ postId, createdAt, user, ...props }) => {
 PostHeader.propTypes = {
   postId: PropTypes.string.isRequired,
   createdAt: PropTypes.instanceOf(Date).isRequired,
-  user: PropTypes.object.isRequired,
+  postUser: PropTypes.object.isRequired,
 };
 
 export default PostHeader;

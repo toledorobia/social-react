@@ -25,6 +25,7 @@ import { MdFavorite, MdModeComment } from "react-icons/md";
 import { randomNumber } from "../../libs/helpers";
 import PostComments from "./PostComments";
 import PostSocialLike from "./PostSocialLike";
+import PostLikesList from "./PostLikesList";
 
 const PostSocial = ({ postId, comments, likes, ...props }) => {
   const user = useSelector((state) => state.auth.user);
@@ -62,29 +63,7 @@ const PostSocial = ({ postId, comments, likes, ...props }) => {
         <HStack alignItems="flex-end">
           <HStack spacing={1}>
             <Icon as={MdFavorite} color="red.500" boxSize="1.2em" />
-            <Popover isLazy closeOnBlur>
-              <PopoverTrigger>
-                <Link fontSize="sm">{likes.length}</Link>
-              </PopoverTrigger>
-              <PopoverContent _focus={{ outline: 0, boxShadow: 0 }}>
-                <PopoverArrow />
-                <PopoverCloseButton />
-                <PopoverBody>
-                  <VStack alignItems="start">
-                    {likes.map((l) => (
-                      <HStack>
-                        <Avatar
-                          size="2xs"
-                          name={l.user.name}
-                          src={l.user.photoUrl}
-                        />
-                        <Text fontSize="sm">{l.user.name}</Text>
-                      </HStack>
-                    ))}
-                  </VStack>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
+            <PostLikesList likes={likes} fontSize="sm" />
           </HStack>
           <Spacer />
           <Link fontSize="sm" onClick={toggleComments}>

@@ -27,7 +27,7 @@ const Post = ({ post, ...props }) => {
         <PostHeader
           postId={post.id}
           createdAt={post.createdAt}
-          user={post.user}
+          postUser={post.user}
         />
         <PostContent
           content={post.content}

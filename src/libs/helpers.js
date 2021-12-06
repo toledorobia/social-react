@@ -4,6 +4,15 @@ import { compress, compressAccurately } from "image-conversion";
 import _ from "lodash";
 import cryptojs from "crypto-js";
 import { v4 as uuidv4 } from "uuid";
+import dayjs from "./dayjs";
+
+export const dateFromNow = (date) => {
+  return dayjs(date).fromNow();
+};
+
+export const dateFormat = (date) => {
+  return dayjs(date).format("LLLL");
+};
 
 export const generateUniqueId = (suffix = "") => {
   const id = cryptojs

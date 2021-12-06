@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback } from "react";
+import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import {
   HStack,
@@ -8,13 +9,60 @@ import {
   Icon,
   Spacer,
   useColorModeValue,
+  useBoolean,
+  useToast,
 } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
+import { toggleLikeComment, deleteComment } from "../../backend/posts";
 import PostAvatar from "./PostAvatar";
-import dayjs from "../../libs/dayjs";
+import PostLikesList from "./PostLikesList";
+import LinkConfirm from "../ui/LinkConfirm";
+import { dateFormat, dateFromNow } from "../../libs/helpers";
 
-const PostComment = ({ comment, ...props }) => {
+const PostComment = ({ postId, comment, ...props }) => {
+  const [loading, setLoading] = useBoolean(false);
+  const toast = useToast();
+  const user = useSelector((state) => state.auth.user);
   const bg = useColorModeValue("gray.200", "gray.700");
+
+  const ownComment = user && user.uid === comment.uid;
+  const isLike = comment.likes.find((l) => l.uid === user.uid) != null;
+
+  const handleCommentLike = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+
+    setLoading.on();
+    try {
+      await toggleLikeComment(postId, comment.id, user.uid, !isLike);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading.off();
+    }
+  }, [loading, setLoading, postId, comment.id, user, isLike]);
+
+  const handleCommentDelete = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+
+    try {
+      setLoading.on();
+      await deleteComment(postId, comment.id);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setLoading.off();
+    }
+  }, [loading, setLoading, postId, comment, toast]);
 
   return (
     <>
@@ -40,20 +88,51 @@ const PostComment = ({ comment, ...props }) => {
           </VStack>
 
           <HStack spacing={1} px={3}>
-            <Link fontWeight="bold" fontSize="xs" color="gray.600">
-              Like
+            <Link
+              onClick={handleCommentLike}
+              fontWeight="bold"
+              fontSize="xs"
+              color="gray.600"
+            >
+              {isLike ? "Unlike" : "Like"}
             </Link>
             <Text fontSize="xs" color="gray.600">
               &bull;
             </Text>
-            <Link fontSize="xs" color="gray.600">
-              {dayjs(comment.createdAt).fromNow()}
+            {ownComment && (
+              <>
+                <LinkConfirm
+                  title="Delete comment"
+                  message="Are you sure you want to delete this comment?"
+                  buttonTitle="Delete"
+                  onConfirm={handleCommentDelete}
+                  fontWeight="bold"
+                  fontSize="xs"
+                  color="gray.600"
+                >
+                  Delete
+                </LinkConfirm>
+                <Text fontSize="xs" color="gray.600">
+                  &bull;
+                </Text>
+              </>
+            )}
+
+            <Link
+              fontSize="xs"
+              color="gray.600"
+              title={dateFormat(comment.createdAt)}
+            >
+              {dateFromNow(comment.createdAt)}
             </Link>
             <Spacer />
             <Icon as={MdFavorite} color="gray.600" boxSize="0.8em" />
-            <Link fontWeight="bold" fontSize="xs" color="gray.600">
-              {comment.likes.length}
-            </Link>
+            <PostLikesList
+              likes={comment.likes}
+              fontSize="xs"
+              fontWeight="bold"
+              color="grey.600"
+            />
           </HStack>
         </VStack>
       </HStack>
@@ -62,6 +141,7 @@ const PostComment = ({ comment, ...props }) => {
 };
 
 PostComment.propTypes = {
+  postId: PropTypes.string.isRequired,
   comment: PropTypes.object.isRequired,
 };
 

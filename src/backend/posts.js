@@ -1,17 +1,15 @@
 import {
   getFirestore,
   doc,
-  setDoc,
   getDoc,
   addDoc,
+  deleteDoc,
   collection,
-  where,
   orderBy,
   query,
   getDocs,
   onSnapshot,
   arrayUnion,
-  arrayRemove,
   updateDoc,
 } from "firebase/firestore";
 import { firebaseDateNow, firebaseDocToObject } from "../libs/helpers";
@@ -38,12 +36,10 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
       snapshot.forEach((doc) => {
         const d = firebaseDocToObject(doc);
 
-        postUsers = [
-          ...postUsers,
-          d.uid,
-          ...d.likes.map((l) => l.uid),
-          ...d.comments.map((c) => c.uid),
-        ];
+        postUsers = d.comments.reduce(
+          (acc, curr) => [...acc, curr.uid, ...curr.likes.map((l) => l.uid)],
+          [...postUsers, d.uid, ...d.likes.map((l) => l.uid)]
+        );
 
         items.push(d);
       });
@@ -53,16 +49,30 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
       const users = store.getState().users.users;
       const posts = items.map((p) => {
         p.user = users.find((u) => u.uid === p.uid);
-        p.likes = p.likes.map((l) => {
-          l.user = users.find((u) => u.uid === l.uid);
-          return l;
-        });
-        p.comments = p.comments.map((c) => {
-          c.createdAt = c.createdAt?.toDate();
-          c.updatedAt = c.updatedAt?.toDate();
-          c.user = users.find((u) => u.uid === c.uid);
-          return c;
-        });
+        p.likes = p.likes
+          .map((l) => {
+            l.user = users.find((u) => u.uid === l.uid);
+            l.createdAt = l.createdAt?.toDate();
+            return l;
+          })
+          .sort((a, b) => a.createdAt - b.createdAt);
+        p.comments = p.comments
+          .map((c) => {
+            c.createdAt = c.createdAt?.toDate();
+            c.updatedAt = c.updatedAt?.toDate();
+            c.user = users.find((u) => u.uid === c.uid);
+
+            c.likes = c.likes
+              .map((l) => {
+                l.user = users.find((u) => u.uid === l.uid);
+                l.createdAt = l.createdAt?.toDate();
+                return l;
+              })
+              .sort((a, b) => a.createdAt - b.createdAt);
+
+            return c;
+          })
+          .sort((a, b) => b.createdAt - a.createdAt);
 
         return p;
       });
@@ -125,6 +135,18 @@ export const newPost = (uid, content, image = null) => {
   });
 };
 
+export const deletePost = (postId) => {
+  return new Promise((resolve, reject) => {
+    const db = getFirestore();
+
+    deletePost(doc(db, "posts", postId))
+      .then((docRef) => {
+        resolve({ id: docRef.id });
+      })
+      .catch((error) => resolve(error));
+  });
+};
+
 export const toggleLike = (postId, uid, like = false) => {
   return new Promise((resolve, reject) => {
     const now = firebaseDateNow();
@@ -153,6 +175,73 @@ export const toggleLike = (postId, uid, like = false) => {
         .catch((error) => {
           reject(error);
         });
+    });
+  });
+};
+
+export const toggleLikeComment = (postId, commentId, uid, like = false) => {
+  return new Promise((resolve, reject) => {
+    const now = firebaseDateNow();
+    const db = getFirestore();
+    const ref = doc(db, "posts", postId);
+
+    getDoc(ref).then((doc) => {
+      const comments = doc.data().comments;
+      const commentIndex = comments.findIndex((c) => c.id === commentId);
+      const comment = comments.find((c) => c.id === commentId);
+
+      const likes = comment.likes;
+      const likesIndex = likes.findIndex((l) => l.uid === uid);
+
+      if (like === true && likesIndex === -1) {
+        likes.push({
+          uid,
+          createdAt: now,
+        });
+      } else if (like === false) {
+        likes.splice(likesIndex, 1);
+      }
+
+      comment.likes = likes;
+      comments[commentIndex] = comment;
+
+      updateDoc(ref, {
+        comments,
+      })
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  });
+};
+
+export const deleteComment = (postId, commentId, uid) => {
+  return new Promise((resolve, reject) => {
+    const db = getFirestore();
+    const ref = doc(db, "posts", postId);
+
+    getDoc(ref).then((doc) => {
+      const comments = doc.data().comments;
+      const commentIndex = comments.findIndex((c) => c.id === commentId);
+
+      if (commentIndex === -1) {
+        resolve();
+      } else {
+        comments.splice(commentIndex, 1);
+
+        updateDoc(ref, {
+          comments,
+        })
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }
     });
   });
 };
