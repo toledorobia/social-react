@@ -46,7 +46,7 @@ const PostHeader = ({ postId, createdAt, postUser, ...props }) => {
       });
       setLoading.off();
     }
-  });
+  }, [postId, loading, setLoading, toast]);
 
   return (
     <>

@@ -16,7 +16,6 @@ import {
   ModalFooter,
   VisuallyHiddenInput,
   Box,
-  Skeleton,
   Image,
   useDisclosure,
   useToast,
@@ -154,6 +153,7 @@ const PostForm = (props) => {
         isOpen={isOpen}
         size="xl"
         closeOnOverlayClick={false}
+        initialFocusRef={refInputContent}
       >
         <ModalOverlay />
         <ModalContent>

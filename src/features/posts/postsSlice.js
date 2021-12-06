@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   posts: [],
-  profilePost: [],
+  profilePosts: [],
   loaded: false,
 };
 
@@ -14,12 +14,12 @@ export const postsSlice = createSlice({
       state.posts = action.payload;
       state.loaded = true;
     },
-    setProfilePosts: (state) => {
-      state.profilePosts = [];
+    setProfilePosts: (state, { payload }) => {
+      state.profilePosts = payload;
     },
   },
 });
 
-export const { setPosts, signOut } = postsSlice.actions;
+export const { setPosts, setProfilePosts } = postsSlice.actions;
 
 export default postsSlice.reducer;

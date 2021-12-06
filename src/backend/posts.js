@@ -7,6 +7,7 @@ import {
   collection,
   orderBy,
   query,
+  where,
   getDocs,
   onSnapshot,
   arrayUnion,
@@ -19,6 +20,50 @@ import { v4 as uuidv4 } from "uuid";
 
 import store from "../store";
 
+const preparePosts = async (posts) => {
+  let postUsers = [];
+
+  posts.forEach((d) => {
+    postUsers = d.comments.reduce(
+      (acc, curr) => [...acc, curr.uid, ...curr.likes.map((l) => l.uid)],
+      [...postUsers, d.uid, ...d.likes.map((l) => l.uid)]
+    );
+  });
+
+  await normalizeUsers(postUsers);
+
+  const users = store.getState().users.users;
+  return posts.map((p) => {
+    p.user = users.find((u) => u.uid === p.uid);
+    p.likes = p.likes
+      .map((l) => {
+        l.user = users.find((u) => u.uid === l.uid);
+        l.createdAt = l.createdAt?.toDate();
+        return l;
+      })
+      .sort((a, b) => a.createdAt - b.createdAt);
+    p.comments = p.comments
+      .map((c) => {
+        c.createdAt = c.createdAt?.toDate();
+        c.updatedAt = c.updatedAt?.toDate();
+        c.user = users.find((u) => u.uid === c.uid);
+
+        c.likes = c.likes
+          .map((l) => {
+            l.user = users.find((u) => u.uid === l.uid);
+            l.createdAt = l.createdAt?.toDate();
+            return l;
+          })
+          .sort((a, b) => a.createdAt - b.createdAt);
+
+        return c;
+      })
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    return p;
+  });
+};
+
 export const snapshotPosts = (uid, onSuccess, onError) => {
   const db = getFirestore();
 
@@ -27,55 +72,16 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
     // where("uid", "==", uid),
     orderBy("createdAt", "desc")
   );
+
   return onSnapshot(
     q,
     async (snapshot) => {
       const items = [];
-      let postUsers = [];
-
       snapshot.forEach((doc) => {
-        const d = firebaseDocToObject(doc);
-
-        postUsers = d.comments.reduce(
-          (acc, curr) => [...acc, curr.uid, ...curr.likes.map((l) => l.uid)],
-          [...postUsers, d.uid, ...d.likes.map((l) => l.uid)]
-        );
-
-        items.push(d);
+        items.push(firebaseDocToObject(doc));
       });
 
-      await normalizeUsers(postUsers);
-
-      const users = store.getState().users.users;
-      const posts = items.map((p) => {
-        p.user = users.find((u) => u.uid === p.uid);
-        p.likes = p.likes
-          .map((l) => {
-            l.user = users.find((u) => u.uid === l.uid);
-            l.createdAt = l.createdAt?.toDate();
-            return l;
-          })
-          .sort((a, b) => a.createdAt - b.createdAt);
-        p.comments = p.comments
-          .map((c) => {
-            c.createdAt = c.createdAt?.toDate();
-            c.updatedAt = c.updatedAt?.toDate();
-            c.user = users.find((u) => u.uid === c.uid);
-
-            c.likes = c.likes
-              .map((l) => {
-                l.user = users.find((u) => u.uid === l.uid);
-                l.createdAt = l.createdAt?.toDate();
-                return l;
-              })
-              .sort((a, b) => a.createdAt - b.createdAt);
-
-            return c;
-          })
-          .sort((a, b) => b.createdAt - a.createdAt);
-
-        return p;
-      });
+      const posts = await preparePosts(items);
 
       if (_.isFunction(onSuccess)) {
         onSuccess(posts);
@@ -89,29 +95,61 @@ export const snapshotPosts = (uid, onSuccess, onError) => {
   );
 };
 
-export const getPostsTimeline = (uid) => {
-  return new Promise((resolve, reject) => {
-    const db = getFirestore();
-    const q = query(
-      collection(db, "posts"),
-      // where("uid", "==", uid),
-      orderBy("createdAt", "desc")
-    );
+export const snapshotProfilePost = (uid, onSuccess, onError) => {
+  const db = getFirestore();
 
-    getDocs(q)
-      .then((querySnapshot) => {
-        const posts = [];
-        querySnapshot.forEach((doc) => {
-          posts.push(firebaseDocToObject(doc));
-        });
+  const q = query(
+    collection(db, "posts"),
+    where("uid", "==", uid),
+    orderBy("createdAt", "desc")
+  );
 
-        resolve(posts);
-      })
-      .catch((error) => {
-        reject(error);
+  return onSnapshot(
+    q,
+    async (snapshot) => {
+      const items = [];
+      snapshot.forEach((doc) => {
+        items.push(firebaseDocToObject(doc));
       });
-  });
+
+      const posts = await preparePosts(items);
+
+      if (_.isFunction(onSuccess)) {
+        onSuccess(posts);
+      }
+    },
+    (err) => {
+      if (_.isFunction(onError)) {
+        onError(err);
+      }
+    }
+  );
 };
+
+// export const getPostsProfile = (uid) => {
+//   return new Promise((resolve, reject) => {
+//     const db = getFirestore();
+//     const q = query(
+//       collection(db, "posts"),
+//       where("uid", "==", uid),
+//       orderBy("createdAt", "desc")
+//     );
+
+//     getDocs(q)
+//       .then(async (querySnapshot) => {
+//         const items = [];
+//         querySnapshot.forEach((doc) => {
+//           items.push(firebaseDocToObject(doc));
+//         });
+
+//         const posts = await preparePosts(items);
+//         resolve(posts);
+//       })
+//       .catch((error) => {
+//         reject(error);
+//       });
+//   });
+// };
 
 export const newPost = (uid, content, image = null) => {
   return new Promise((resolve, reject) => {
@@ -139,9 +177,9 @@ export const deletePost = (postId) => {
   return new Promise((resolve, reject) => {
     const db = getFirestore();
 
-    deletePost(doc(db, "posts", postId))
+    deleteDoc(doc(db, "posts", postId))
       .then((docRef) => {
-        resolve({ id: docRef.id });
+        resolve();
       })
       .catch((error) => resolve(error));
   });
