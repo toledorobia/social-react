@@ -1,116 +1,112 @@
-import {
-  getAuth,
-  setPersistence,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut as signOutFirebase,
-  browserLocalPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { saveToken, removeToken, axios } from "../libs/http";
 
-import { firebaseDateNow, firebaseTimestampToDates } from "../libs/helpers";
-import _ from "lodash";
-
-export const snapshotAuthState = (callback) => {
-  const auth = getAuth();
-
-  return onAuthStateChanged(auth, (user) => {
-    if (!_.isFunction(callback)) {
-      return;
-    }
-
-    if (user == null) {
-      callback(null);
-    } else {
-      getFirestoreUser(user.uid).then((userfs) => {
-        if (user.emailVerified === true && userfs.emailVerified === false) {
-          updateFirestoreUser(userfs.uid, { emailVerified: true }).then(() => {
-            userfs.emailVerified = true;
-            callback(user);
-          });
-        } else {
-          callback(userfs);
-        }
-      });
-    }
-  });
-};
-
-export const signIn = (email, password, remember) => {
+export const check = () => {
   return new Promise((resolve, reject) => {
-    const auth = getAuth();
-
-    setPersistence(
-      auth,
-      remember ? browserLocalPersistence : browserSessionPersistence
-    )
-      .then(() => signInWithEmailAndPassword(auth, email, password))
-      .then((user) => resolve(user))
-      .catch((error) => reject(error));
+    axios
+      .get("/api/auth/check")
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };
 
-export const signUp = async (email, name, password) => {
-  const auth = getAuth();
-  const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
-  await sendEmailVerification(userCredential.user);
-  await updateProfile(userCredential.user, { displayName: name });
-
-  const uid = userCredential.user.uid;
-  const db = getFirestore();
-  const now = firebaseDateNow();
-
-  await setDoc(doc(db, "users", uid), {
-    name: name,
-    email: email,
-    emailVerified: false,
-    photoUrl: null,
-    updateAt: now,
-    createdAt: now,
+export const signIn = (email, password) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post("/api/auth/signin", { email, password }, { withoutToken: true })
+      .then((response) => {
+        console.log("response", response);
+        saveToken(response.data.token);
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
-
-  return signOutFirebase(auth);
 };
 
 export const signOut = () => {
-  const auth = getAuth();
-  return signOutFirebase(auth);
-};
-
-export const passwordResetEmail = (email) => {
-  const auth = getAuth();
-  return sendPasswordResetEmail(auth, email);
-};
-
-export const updateFirestoreUser = (uid, data = {}) => {
-  const db = getFirestore();
-  return updateDoc(doc(db, "users", uid), data);
-};
-
-export const getFirestoreUser = (uid) => {
   return new Promise((resolve, reject) => {
-    const db = getFirestore();
-    const docRef = doc(db, "users", uid);
-    getDoc(docRef)
-      .then((docSnap) => {
-        const data = firebaseTimestampToDates(docSnap.data());
-        resolve({ uid: docSnap.id, ...data });
+    axios
+      .post("/api/auth/signout", {})
+      .then((response) => {
+        removeToken();
+        resolve(response.data);
       })
-      .catch((error) => resolve(error));
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const signUp = (name, email, password) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        "/api/auth/signup",
+        { name, email, password },
+        { withoutToken: true }
+      )
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const verifyEmail = (id, hash) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`/api/auth/email/verify/${id}/${hash}`, { withoutToken: true })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const sendPasswordResetEmail = (email) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`/api/auth/reset/send`, { email }, { withoutToken: true })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const verifyPasswordResetHash = (id, hash) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`/api/auth/reset/verify/${id}/${hash}`, { withoutToken: true })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const resetPassword = (id, hash, password) => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`/api/auth/reset`, { id, hash, password }, { withoutToken: true })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };

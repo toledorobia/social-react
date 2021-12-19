@@ -34,7 +34,7 @@ import mime from "mime-types";
 
 import PostAvatar from "./PostAvatar";
 
-const PostForm = (props) => {
+const PostForm = () => {
   const toast = useToast();
   const refInputContent = useRef(null);
   const refInputImage = useRef(null);
@@ -53,7 +53,7 @@ const PostForm = (props) => {
     onOpen();
   };
 
-  const onClickInputImage = (e) => {
+  const onClickInputImage = () => {
     refInputImage.current.click();
   };
 
@@ -106,7 +106,7 @@ const PostForm = (props) => {
   );
 
   const onSubmit = useCallback(
-    async (e) => {
+    async () => {
       try {
         setLoading.on();
         setPosting.on();

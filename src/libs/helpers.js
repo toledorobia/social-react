@@ -1,6 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import mime from "mime-types";
-import { compress, compressAccurately } from "image-conversion";
+import { compress } from "image-conversion";
 import _ from "lodash";
 import cryptojs from "crypto-js";
 import { v4 as uuidv4 } from "uuid";
@@ -10,8 +9,8 @@ export const dateFromNow = (date) => {
   return dayjs(date).fromNow();
 };
 
-export const dateFormat = (date) => {
-  return dayjs(date).format("LLLL");
+export const dateFormat = (date, format = "LLLL") => {
+  return dayjs(date).format(format);
 };
 
 export const generateUniqueId = (suffix = "") => {
@@ -22,6 +21,7 @@ export const generateUniqueId = (suffix = "") => {
 };
 
 export const publicUrl = (path) => {
+  // eslint-disable-next-line no-undef
   return process.env.PUBLIC_URL + path;
 };
 
@@ -87,7 +87,7 @@ export const isSomething = (obj) => {
   return !isNothing(obj);
 };
 
-export const imageValidation = (file, mimes = [], size = 1000) => {
+export const imageValidation = (file, size = 1000) => {
   if (file == null) {
     return false;
   }

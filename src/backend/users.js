@@ -1,29 +1,20 @@
 import {
   getFirestore,
   doc,
-  setDoc,
   getDoc,
-  addDoc,
   collection,
   where,
-  orderBy,
   query,
   getDocs,
-  onSnapshot,
   documentId,
 } from "firebase/firestore";
-import {
-  firebaseDateNow,
-  firebaseDocToObject,
-  firebaseTimestampToDates,
-} from "../libs/helpers";
+import { firebaseTimestampToDates } from "../libs/helpers";
 
 import { mergeUsers } from "../features/users/usersSlice";
 import store from "../store";
 
 export const normalizeUsers = async (uids) => {
   const _uids = [...new Set(uids)];
-  // console.log("normalizeUsers", _uids);
 
   const currentUids = store.getState().users.users.map((u) => u.uid);
   const newUids = _uids.filter((uid) => !currentUids.includes(uid));
@@ -43,4 +34,21 @@ export const normalizeUsers = async (uids) => {
   });
 
   store.dispatch(mergeUsers(newUsers));
+};
+
+export const getUser = (uid) => {
+  console.log("getUser", uid);
+  return new Promise((resolve, reject) => {
+    const db = getFirestore();
+    const ref = doc(db, "users", uid);
+
+    getDoc(ref)
+      .then((doc) => {
+        const u = firebaseTimestampToDates(doc.data());
+        resolve({ uid: doc.id, ...u });
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
 };

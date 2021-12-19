@@ -5,7 +5,7 @@ import PostContent from "./PostContent";
 import PostHeader from "./PostHeader";
 import PostSocial from "./PostSocial";
 
-const Post = ({ post, ...props }) => {
+const Post = ({ post, showAll }) => {
   const bg = useColorModeValue("white", "gray.700");
   const bgHover = useColorModeValue("white", "gray.700");
 
@@ -38,6 +38,7 @@ const Post = ({ post, ...props }) => {
           postId={post.id}
           comments={post.comments}
           likes={post.likes}
+          showAll={showAll}
         />
       </VStack>
     </>
@@ -46,6 +47,7 @@ const Post = ({ post, ...props }) => {
 
 Post.propTypes = {
   post: PropTypes.object.isRequired,
+  showAll: PropTypes.bool.isRequired,
 };
 
 export default Post;

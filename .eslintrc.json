@@ -1,0 +1,76 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "plugins": ["react"],
+  // "rules": {
+  //   "indent": ["warn", 2],
+  //   "quotes": ["warn", "double"],
+  //   "comma-dangle": [
+  //     "warn",
+  //     {
+  //       "arrays": "always-multiline",
+  //       "objects": "always-multiline",
+  //       "imports": "always-multiline",
+  //       "exports": "never",
+  //       "functions": "never"
+  //     }
+  //   ],
+  //   "space-before-blocks": ["warn", "always"],
+  //   "no-async-promise-executor": "off",
+  //   "no-unused-vars": "warn",
+  //   "no-multi-spaces": "warn",
+  //   "no-trailing-spaces": "warn",
+  //   "no-multiple-empty-lines": ["warn", { "max": 1, "maxEOF": 0 }],
+  //   "block-spacing": "error",
+  //   "space-in-parens": ["warn", "never"],
+  //   "spaced-comment": ["warn", "always"],
+  //   "keyword-spacing": ["warn", { "before": true, "after": true }],
+  //   "comma-spacing": ["warn", { "before": false, "after": true }],
+  //   "arrow-parens": ["warn", "always"],
+  //   "arrow-spacing": ["warn", { "before": true, "after": true }],
+  //   "brace-style": ["warn", "stroustrup", { "allowSingleLine": false }],
+  //   "computed-property-spacing": ["warn", "never"],
+  //   "func-call-spacing": ["warn", "never"],
+  //   "new-parens": ["warn", "always"],
+  //   "no-whitespace-before-property": "warn",
+  //   "object-curly-spacing": ["warn", "always"],
+  //   "rest-spread-spacing": ["warn", "never"],
+  //   "semi": ["warn", "always"],
+  //   "space-before-function-paren": ["warn", "never"],
+  //   "array-bracket-spacing": ["warn", "never"],
+
+  //   "react/jsx-max-props-per-line": [
+  //     "warn",
+  //     { "when": "always", "maximum": 1 }
+  //   ],
+  //   "react/jsx-indent-props": ["warn", 2],
+  //   "react/jsx-first-prop-new-line": ["warn", "never"],
+  //   "react/jsx-space-before-closing": "warn",
+  //   "react/no-unescaped-entities": "error",
+  //   "react/prop-types": "off",
+  //   "react/jsx-indent": ["warn", 2],
+  //   "react/function-component-definition": [
+  //     "warn",
+  //     { "namedComponents": "arrow-function" }
+  //   ],
+  //   "react/jsx-closing-bracket-location": ["warn", "after-props"],
+  //   "react/jsx-curly-spacing": ["warn", "never"],
+  //   "react/jsx-one-expression-per-line": ["warn"]
+  // },
+  "ignorePatterns": ["node_modules", "build", "dist", "public"]
+}

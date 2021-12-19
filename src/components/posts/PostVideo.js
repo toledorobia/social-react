@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import { Skeleton } from "@chakra-ui/react";
 
 const PostVideo = ({ src, ...props }) => {
@@ -24,6 +25,10 @@ const PostVideo = ({ src, ...props }) => {
       </Skeleton>
     </>
   );
+};
+
+PostVideo.propTypes = {
+  src: PropTypes.string.isRequired,
 };
 
 export default PostVideo;

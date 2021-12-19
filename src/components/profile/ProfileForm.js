@@ -1,6 +1,5 @@
 import React, { useRef, useCallback, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { signIn } from "../../features/auth/authSlice";
 
 import {
   Stack,
@@ -18,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 
 import { uploadImage } from "../../backend/storage";
-import { getFirestoreUser, updateFirestoreUser } from "../../backend/auth";
+// import { getFirestoreUser, updateFirestoreUser } from "../../backend/auth";
 import { FiEdit2 } from "react-icons/fi";
 import {
   publicUrl,
@@ -36,20 +35,20 @@ const ProfileForm = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isChangeName, setIsChangeName] = useState(false);
 
-  const onChangeAvatar = (e) => {
+  const onChangeAvatar = () => {
     refInputAvatar.current.click();
   };
 
   const onChangeName = useCallback(
-    async (value) => {
+    async () => {
       setIsChangeName(true);
 
-      await updateFirestoreUser(user.uid, {
-        name: value,
-      });
+      // await updateFirestoreUser(user.uid, {
+      //   name: value,
+      // });
 
-      const userUpdated = await getFirestoreUser(user.uid);
-      dispatch(signIn(userUpdated));
+      // const userUpdated = await getFirestoreUser(user.uid);
+      // dispatch(signIn(userUpdated));
       setIsChangeName(false);
     },
     [user.uid, dispatch]
@@ -77,11 +76,12 @@ const ProfileForm = () => {
         });
 
         const ext = mime.extension(image.type);
+        // eslint-disable-next-line no-unused-vars
         const url = await uploadImage(image, "profile", user.uid + "." + ext);
-        await updateFirestoreUser(user.uid, { photoUrl: url });
+        // await updateFirestoreUser(user.uid, { photoUrl: url });
 
-        const userUpdated = await getFirestoreUser(user.uid);
-        dispatch(signIn(userUpdated));
+        // const userUpdated = await getFirestoreUser(user.uid);
+        // dispatch(signIn(userUpdated));
 
         toast({
           title: "Success",

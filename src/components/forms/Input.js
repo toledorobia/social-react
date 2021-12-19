@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import PropTypes from "prop-types";
 import { Field } from "formik";
 
 import {
@@ -9,8 +10,6 @@ import {
 } from "@chakra-ui/react";
 
 const Input = ({ title, name, type, ...rest }) => {
-  console.log("Input", name, type, rest);
-
   return (
     <>
       <Field name={name}>
@@ -25,5 +24,12 @@ const Input = ({ title, name, type, ...rest }) => {
     </>
   );
 };
+
+Input.propTypes = {
+  title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+};
+
 
 export default memo(Input);

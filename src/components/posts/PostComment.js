@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { Link as LinkRouter } from "react-router-dom";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import {
@@ -19,7 +20,7 @@ import PostLikesList from "./PostLikesList";
 import LinkConfirm from "../ui/LinkConfirm";
 import { dateFormat, dateFromNow } from "../../libs/helpers";
 
-const PostComment = ({ postId, comment, ...props }) => {
+const PostComment = ({ postId, comment }) => {
   const [loading, setLoading] = useBoolean(false);
   const toast = useToast();
   const user = useSelector((state) => state.auth.user);
@@ -81,7 +82,12 @@ const PostComment = ({ postId, comment, ...props }) => {
             px={3}
             py={2}
           >
-            <Link fontWeight="bold" fontSize="xs">
+            <Link
+              as={LinkRouter}
+              to={"/profile/" + comment.user.uid}
+              fontWeight="bold"
+              fontSize="xs"
+            >
               {comment.user.name}
             </Link>
             <Text fontSize="sm">{comment.content}</Text>

@@ -1,5 +1,6 @@
 import React from "react";
-import { Link as LinkRouter, useNavigate } from "react-router-dom";
+import { Link as LinkRouter } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import {
@@ -11,8 +12,10 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { signIn } from "../backend/auth";
-import { Input, Checkbox } from "../components/forms";
+// import { signIn } from "../backend/auth";
+import { Input } from "../components/forms";
+
+import { signIn } from "../features/auth/authSlice";
 
 const FormSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -20,17 +23,14 @@ const FormSchema = Yup.object().shape({
 });
 
 const SignInPage = () => {
+  const dispatch = useDispatch();
   const toast = useToast();
-  const navigate = useNavigate();
 
   const submit = async (values) => {
-    const { email, password, remember } = values;
+    const { email, password } = values;
     try {
-      // TODO: fix if user didn't validate email.
-      await signIn(email, password, remember);
-      // navigate("/", { replace: true });
+      await dispatch(signIn({ email, password })).unwrap();
     } catch (error) {
-      console.log(error);
       toast({
         title: "Error",
         description: error.message,
@@ -53,7 +53,8 @@ const SignInPage = () => {
           </Stack>
 
           <Formik
-            initialValues={{ email: "", password: "", remember: false }}
+            // initialValues={{ email: "", password: "", remember: false }}
+            initialValues={{ email: "", password: "" }}
             validationSchema={FormSchema}
             onSubmit={submit}
           >
@@ -62,7 +63,7 @@ const SignInPage = () => {
                 <Stack spacing={5}>
                   <Input name="email" type="email" title="Email" />
                   <Input name="password" type="password" title="Password" />
-                  <Checkbox name="remember" title="Remember me" />
+                  {/* <Checkbox name="remember" title="Remember me" /> */}
 
                   <Stack spacing={5}>
                     <Button

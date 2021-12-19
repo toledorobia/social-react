@@ -8,12 +8,15 @@ import {
   orderBy,
   query,
   where,
-  getDocs,
   onSnapshot,
   arrayUnion,
   updateDoc,
 } from "firebase/firestore";
-import { firebaseDateNow, firebaseDocToObject } from "../libs/helpers";
+import {
+  firebaseDateNow,
+  firebaseDocToObject,
+  isSomething,
+} from "../libs/helpers";
 import _ from "lodash";
 import { normalizeUsers } from "./users";
 import { v4 as uuidv4 } from "uuid";
@@ -62,6 +65,32 @@ const preparePosts = async (posts) => {
 
     return p;
   });
+};
+
+export const snapshotPost = (postId, onSuccess, onError) => {
+  const db = getFirestore();
+
+  return onSnapshot(
+    doc(db, "posts", postId),
+    async (doc) => {
+      if (isSomething(doc.data()) && _.isFunction(onSuccess)) {
+        const items = [firebaseDocToObject(doc)];
+        const posts = await preparePosts(items);
+
+        onSuccess(posts[0]);
+        return;
+      }
+
+      if (_.isFunction(onSuccess)) {
+        onSuccess(null);
+      }
+    },
+    (err) => {
+      if (_.isFunction(onError)) {
+        onError(err);
+      }
+    }
+  );
 };
 
 export const snapshotPosts = (uid, onSuccess, onError) => {
@@ -152,7 +181,7 @@ export const snapshotProfilePost = (uid, onSuccess, onError) => {
 // };
 
 export const newPost = (uid, content, image = null) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const now = firebaseDateNow();
     const db = getFirestore();
 
@@ -174,11 +203,11 @@ export const newPost = (uid, content, image = null) => {
 };
 
 export const deletePost = (postId) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const db = getFirestore();
 
     deleteDoc(doc(db, "posts", postId))
-      .then((docRef) => {
+      .then(() => {
         resolve();
       })
       .catch((error) => resolve(error));
@@ -256,7 +285,7 @@ export const toggleLikeComment = (postId, commentId, uid, like = false) => {
   });
 };
 
-export const deleteComment = (postId, commentId, uid) => {
+export const deleteComment = (postId, commentId) => {
   return new Promise((resolve, reject) => {
     const db = getFirestore();
     const ref = doc(db, "posts", postId);

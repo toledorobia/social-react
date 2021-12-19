@@ -1,8 +1,8 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
+import { Link as LinkRouter } from "react-router-dom";
 import {
-  Text,
   HStack,
   VStack,
   Menu,
@@ -14,14 +14,13 @@ import {
   useBoolean,
   useToast,
 } from "@chakra-ui/react";
-import { FiMenu, FiTrash2 } from "react-icons/fi";
-import { dateFormat, dateFromNow } from "../../libs/helpers";
 import PostAvatar from "./PostAvatar";
 import MenuItemConfirm from "../ui/MenuItemConfirm";
-
+import { FiMenu, FiTrash2 } from "react-icons/fi";
+import { dateFormat, dateFromNow } from "../../libs/helpers";
 import { deletePost } from "../../backend/posts";
 
-const PostHeader = ({ postId, createdAt, postUser, ...props }) => {
+const PostHeader = ({ postId, createdAt, postUser }) => {
   const toast = useToast();
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useBoolean(false);
@@ -53,8 +52,19 @@ const PostHeader = ({ postId, createdAt, postUser, ...props }) => {
       <HStack px={4} pt={3}>
         <PostAvatar name={postUser.name} src={postUser.photoUrl} />
         <VStack spacing={0} alignItems="start" flex={1}>
-          <Text fontWeight="bold">{postUser.name}</Text>
-          <Link fontSize="xs" title={dateFormat(createdAt)}>
+          <Link
+            as={LinkRouter}
+            to={"/profile/" + postUser.uid}
+            fontWeight="bold"
+          >
+            {postUser.name}
+          </Link>
+          <Link
+            as={LinkRouter}
+            to={"/post/" + postId}
+            fontSize="xs"
+            title={dateFormat(createdAt)}
+          >
             {dateFromNow(createdAt)}
           </Link>
         </VStack>

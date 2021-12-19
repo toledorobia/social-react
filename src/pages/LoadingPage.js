@@ -2,7 +2,7 @@ import React from "react";
 
 import { Center, Spinner, } from "@chakra-ui/react";
 
-const LoadingPage = (props) => {
+const LoadingPage = () => {
   return (
     <>
       <Center h="100vh">

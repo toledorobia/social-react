@@ -1,5 +1,7 @@
 import React, { useCallback } from "react";
+import PropTypes from "prop-types";
 import { Link as LinkRouter, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 
 import {
@@ -17,8 +19,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import { FiHome, FiTrendingUp, FiMenu, FiLogOut, FiUser } from "react-icons/fi";
-import { signOut } from "../../backend/auth";
+import { FiHome, FiMenu, FiLogOut, FiUser } from "react-icons/fi";
+import { signOut } from "../../features/auth/authSlice";
 
 const SideBar = ({ children }) => {
   // const user = useSelector((state) => state.auth.user);
@@ -52,14 +54,19 @@ const SideBar = ({ children }) => {
   );
 };
 
+SideBar.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 const SidebarContent = ({ onClose, ...rest }) => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
 
   const handleSignOut = useCallback(async () => {
-    await signOut();
+    await dispatch(signOut());
     navigate("/");
-  }, [navigate]);
+  }, [dispatch, navigate]);
 
   return (
     <Box
@@ -76,7 +83,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
           <Text fontSize="2xl" fontWeight="bold">
             Social
           </Text>
-          <Text fontSize="xs">{user.displayName}</Text>
+          <Text fontSize="xs">{user.name}</Text>
         </VStack>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
@@ -91,6 +98,10 @@ const SidebarContent = ({ onClose, ...rest }) => {
       </NavItem>
     </Box>
   );
+};
+
+SidebarContent.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 const NavItem = ({ to, onClick, icon, children, ...rest }) => {
@@ -161,6 +172,13 @@ const NavItem = ({ to, onClick, icon, children, ...rest }) => {
   );
 };
 
+NavItem.propTypes = {
+  to: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
+  icon: PropTypes.elementType,
+  children: PropTypes.node.isRequired,
+};
+
 const MobileNav = ({ onOpen, ...rest }) => {
   return (
     <Flex
@@ -191,6 +209,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
       </Text>
     </Flex>
   );
+};
+
+MobileNav.propTypes = {
+  onOpen: PropTypes.func.isRequired,
 };
 
 export default SideBar;

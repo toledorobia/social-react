@@ -6,7 +6,7 @@ import { Button, useBoolean } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
 import { toggleLike } from "../../backend/posts";
 
-const PostSocialLike = ({ postId, likes, ...props }) => {
+const PostSocialLike = ({ postId, likes }) => {
   const [loading, setLoading] = useBoolean(false);
   const user = useSelector((state) => state.auth.user);
   const isLike = likes.find((l) => l.uid === user.uid) != null;

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Avatar, Skeleton } from "@chakra-ui/react";
+import React from "react";
+import { Avatar } from "@chakra-ui/react";
 
 const PostAvatar = (props) => {
   return (

@@ -5,7 +5,7 @@ import { Text } from "@chakra-ui/react";
 import PostImage from "./PostImage";
 import PostVideo from "./PostVideo";
 
-const PostContent = ({ content, image, video, ...props }) => {
+const PostContent = ({ content, image, video }) => {
   return (
     <>
       {content && <Text px={4}>{content}</Text>}

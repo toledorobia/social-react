@@ -6,7 +6,7 @@ import { Box, useColorModeValue, useBoolean, useToast } from "@chakra-ui/react";
 import { newPostComment } from "../../backend/posts";
 import { isEmptyString } from "../../libs/helpers";
 
-const PostCommentForm = ({ postId, forceFocus, ...props }) => {
+const PostCommentForm = ({ postId, forceFocus }) => {
   const user = useSelector((state) => state.auth.user);
   const toast = useToast();
   const [loading, setLoading] = useBoolean(false);

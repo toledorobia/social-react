@@ -13,7 +13,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import { passwordResetEmail } from "../backend/auth";
+import { sendPasswordResetEmail } from "../backend/auth";
 import { Input } from "../components/forms";
 
 const FormSchema = Yup.object().shape({
@@ -28,25 +28,20 @@ const ForgotPasswordPage = () => {
     const { email } = values;
 
     try {
-      await passwordResetEmail(email);
+      await sendPasswordResetEmail(email);
+
       toast({
         title: "Password Reset.",
         description: "Password reset email sent, check your inbox.",
         status: "success",
-        duration: 9000,
-        isClosable: true,
       });
 
       navigate("/", { replace: true });
     } catch (error) {
-      console.log(error);
-
       toast({
         title: "Error",
         description: error.message,
         status: "error",
-        duration: 9000,
-        isClosable: true,
       });
     }
   };

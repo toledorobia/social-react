@@ -1,7 +1,7 @@
 import React from "react";
 import { VisuallyHiddenInput } from "@chakra-ui/react";
 
-const InputFileHidden = (props) => {
+const InputFileHidden = () => {
   return (
     <>
       <VisuallyHiddenInput 
