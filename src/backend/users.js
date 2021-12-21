@@ -1,54 +1,36 @@
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  collection,
-  where,
-  query,
-  getDocs,
-  documentId,
-} from "firebase/firestore";
-import { firebaseTimestampToDates } from "../libs/helpers";
+import { isSomething } from "../libs/helpers";
+import { axios } from "../libs/http";
 
-import { mergeUsers } from "../features/users/usersSlice";
-import store from "../store";
-
-export const normalizeUsers = async (uids) => {
-  const _uids = [...new Set(uids)];
-
-  const currentUids = store.getState().users.users.map((u) => u.uid);
-  const newUids = _uids.filter((uid) => !currentUids.includes(uid));
-
-  if (newUids.length === 0) {
-    return Promise.resolve();
-  }
-
-  const db = getFirestore();
-  const q = query(collection(db, "users"), where(documentId(), "in", newUids));
-  const querySnapshot = await getDocs(q);
-
-  const newUsers = [];
-  querySnapshot.forEach((doc) => {
-    const u = firebaseTimestampToDates(doc.data());
-    newUsers.push({ uid: doc.id, ...u });
+export const getProfile = (id) => {
+  return new Promise((resolve, reject) => {
+    axios.get(`/api/users/${id}`).then((response) => {
+      resolve(response.data);
+    }).catch((error) => {
+      reject(error);
+    });
   });
-
-  store.dispatch(mergeUsers(newUsers));
 };
 
-export const getUser = (uid) => {
-  console.log("getUser", uid);
+export const updateProfile = (id, { name, avatar }) => {
   return new Promise((resolve, reject) => {
-    const db = getFirestore();
-    const ref = doc(db, "users", uid);
+    const data = new FormData();
 
-    getDoc(ref)
-      .then((doc) => {
-        const u = firebaseTimestampToDates(doc.data());
-        resolve({ uid: doc.id, ...u });
-      })
-      .catch((err) => {
-        reject(err);
-      });
+    if (isSomething(name)) {
+      data.append("name", name);
+    }
+
+    if (isSomething(avatar)) {
+      data.append("avatar", avatar);
+    }
+
+    axios.put(`/api/users/${id}`, data, { 
+      headers: {
+        "Content-Type": "multipart/form-data",
+      } 
+    }).then((response) => {
+      resolve(response.data);
+    }).catch((error) => {
+      reject(error);
+    });
   });
 };

@@ -18,7 +18,6 @@ import {
   isSomething,
 } from "../libs/helpers";
 import _ from "lodash";
-import { normalizeUsers } from "./users";
 import { v4 as uuidv4 } from "uuid";
 
 import store from "../store";
@@ -33,7 +32,7 @@ const preparePosts = async (posts) => {
     );
   });
 
-  await normalizeUsers(postUsers);
+  // await normalizeUsers(postUsers);
 
   const users = store.getState().users.users;
   return posts.map((p) => {

@@ -9,7 +9,7 @@ import {
   Spinner,
   useToast,
 } from "@chakra-ui/react";
-import { verifyEmail } from "../backend/auth";
+import { verifyEmail } from "../../backend/auth";
 
 const VerifyEmailPage = () => {
   const params = useParams();

@@ -1,8 +1,8 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { VStack } from "@chakra-ui/react";
-import { Post } from "../components/posts";
-import PostForm from "../components/posts/PostForm";
+import { Post } from "../../components/posts";
+import PostForm from "../../components/posts/PostForm";
 // import posts from "../data/posts";
 
 import dayjs from "dayjs";

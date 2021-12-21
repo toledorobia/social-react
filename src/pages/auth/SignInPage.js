@@ -13,9 +13,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 // import { signIn } from "../backend/auth";
-import { Input } from "../components/forms";
-
-import { signIn } from "../features/auth/authSlice";
+import { Input } from "../../components/forms";
+import { signIn } from "../../features/auth/authSlice";
 
 const FormSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),

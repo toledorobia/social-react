@@ -3,13 +3,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { VStack } from "@chakra-ui/react";
 
-import { setPost } from "../features/posts/postsSlice";
-import { snapshotPost } from "../backend/posts";
-import Post from "../components/posts/Post";
+import { setPost } from "../../features/posts/postsSlice";
+import { snapshotPost } from "../../backend/posts";
+import Post from "../../components/posts/Post";
 
-import { isEmptyString } from "../libs/helpers";
-import NotFoundPage from "./NotFoundPage";
-import LoadingPage from "./LoadingPage";
+import { isEmptyString } from "../../libs/helpers";
+import NotFoundPage from "../common/NotFoundPage";
+import LoadingPage from "../common/LoadingPage";
 
 const PostPage = () => {
   const params = useParams();

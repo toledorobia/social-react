@@ -1,24 +1,22 @@
-import React from "react";
-import { Link as LinkRouter, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link as LinkRouter, useNavigate, useParams } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
 import {
   Flex,
   Stack,
-  Link,
-  Button,
   Heading,
   Text,
+  Spinner,
+  Button,
+  Link,
   useToast,
 } from "@chakra-ui/react";
-
-import { Input } from "../components/forms";
-import { signUp } from "../backend/auth";
+import { verifyPasswordResetHash, resetPassword } from "../../backend/auth";
+import { Input } from "../../components/forms";
 
 const FormSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Required"),
-  name: Yup.string().required("Required"),
   password: Yup.string().min(6, "6 chars minimum").required("Required"),
   passwordConfirmation: Yup.string().oneOf(
     [Yup.ref("password"), null],
@@ -26,18 +24,41 @@ const FormSchema = Yup.object().shape({
   ),
 });
 
-const SignUpPage = () => {
+const ResetPasswordPage = () => {
+  const [loading, setLoading] = useState(true);
+  const params = useParams();
   const navigate = useNavigate();
   const toast = useToast();
 
+  const { id, hash } = params;
+
+  useEffect(() => {
+    verifyPasswordResetHash(id, hash)
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+
+        navigate("/");
+      });
+  }, [id, hash, toast, navigate]);
+
   const submit = async (values) => {
     try {
-      const { name, email, password } = values;
-      await signUp(name, email, password);
+      const { password } = values;
+      await resetPassword(id, hash, password);
 
       toast({
-        title: "Sign up successfully.",
-        description: "You need to verify your email address first.",
+        title: "Reset password successfully.",
+        description: "You can now login with your new password.",
         status: "success",
       });
 
@@ -53,12 +74,24 @@ const SignUpPage = () => {
 
   return (
     <>
-      <Flex minH="100vh" align="center" justify="center">
+      {loading && <Flex minH="100vh" align="center" justify="center">
         <Stack spacing={8} mx="auto" maxW="lg" py={8} px={6} flex="1">
           <Stack align="center">
             <Heading>Social</Heading>
             <Text fontSize="lg" align="center" color="gray.600">
-              Create a new account ✌️
+              Verifing...
+            </Text>
+            <Spinner />
+          </Stack>
+        </Stack>
+      </Flex>}
+
+      {!loading && <Flex minH="100vh" align="center" justify="center">
+        <Stack spacing={8} mx="auto" maxW="lg" py={8} px={6} flex="1">
+          <Stack align="center">
+            <Heading>Social</Heading>
+            <Text fontSize="lg" align="center" color="gray.600">
+              Please enter your new password.
             </Text>
           </Stack>
 
@@ -75,8 +108,6 @@ const SignUpPage = () => {
             {({ isSubmitting }) => (
               <Form>
                 <Stack spacing={5}>
-                  <Input name="email" type="email" title="Email" />
-                  <Input name="name" type="text" title="Name" />
                   <Input name="password" type="password" title="Password" />
                   <Input
                     name="passwordConfirmation"
@@ -90,7 +121,7 @@ const SignUpPage = () => {
                       isLoading={isSubmitting}
                       type="submit"
                     >
-                      Sign Up
+                      Reset Password
                     </Button>
 
                     <Text align="right">
@@ -105,9 +136,9 @@ const SignUpPage = () => {
             )}
           </Formik>
         </Stack>
-      </Flex>
+      </Flex>}
     </>
   );
 };
 
-export default SignUpPage;
+export default ResetPasswordPage;

@@ -20,11 +20,11 @@ instance.interceptors.request.use(async function (config) {
 
   if (token != null) {
     const decode = jwt_decode(token);
-    console.log("decode", decode);
+    // console.log("decode", decode);
     needRefresh = dayjs.unix(decode.exp).diff(dayjs()) < 1;
   }
 
-  console.log("needRefresh", needRefresh);
+  // console.log("needRefresh", needRefresh);
 
   if (needRefresh) {
     const response = await axios.post(
@@ -35,7 +35,7 @@ instance.interceptors.request.use(async function (config) {
       }
     );
 
-    console.log("response", response);
+    // console.log("response", response);
     token = response.data.token;
   }
 

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState, memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import {
@@ -16,16 +16,15 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import { uploadImage } from "../../backend/storage";
-// import { getFirestoreUser, updateFirestoreUser } from "../../backend/auth";
 import { FiEdit2 } from "react-icons/fi";
 import {
   publicUrl,
   imageValidation,
-  imageProcessing,
 } from "../../libs/helpers";
 import dayjs from "../../libs/dayjs";
-import mime from "mime-types";
+
+import { setUser } from "../../features/auth/authSlice";
+import { updateProfile } from "../../features/users/usersSlice";
 
 const ProfileForm = () => {
   const toast = useToast();
@@ -40,25 +39,29 @@ const ProfileForm = () => {
   };
 
   const onChangeName = useCallback(
-    async () => {
-      setIsChangeName(true);
-
-      // await updateFirestoreUser(user.uid, {
-      //   name: value,
-      // });
-
-      // const userUpdated = await getFirestoreUser(user.uid);
-      // dispatch(signIn(userUpdated));
-      setIsChangeName(false);
+    async (value) => {
+      try {
+        setIsChangeName(true);
+        const _user = await dispatch(updateProfile({ id: user.id, name: value })).unwrap();
+        dispatch(setUser(_user));
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+        });
+      } finally {
+        setIsChangeName(false);
+      }
     },
-    [user.uid, dispatch]
+    [user.id, dispatch]
   );
 
   const onUploadAvatar = useCallback(
     async (e) => {
-      setIsUploading(true);
-
       try {
+        setIsUploading(true);
+
         const files = e.target.files || e.dataTransfer.files;
         if (files.length === 0) {
           return;
@@ -69,26 +72,13 @@ const ProfileForm = () => {
           throw new Error("Image must be jpeg or png and less than 2MB");
         }
 
-        const image = await imageProcessing(file, {
-          quality: 0.6,
-          type: "image/jpeg",
-          scale: 0.2,
-        });
-
-        const ext = mime.extension(image.type);
-        // eslint-disable-next-line no-unused-vars
-        const url = await uploadImage(image, "profile", user.uid + "." + ext);
-        // await updateFirestoreUser(user.uid, { photoUrl: url });
-
-        // const userUpdated = await getFirestoreUser(user.uid);
-        // dispatch(signIn(userUpdated));
-
+        const _user = await dispatch(updateProfile({ id: user.id, avatar: file })).unwrap();
+        dispatch(setUser(_user));
+        
         toast({
           title: "Success",
           description: "Profile photo updated",
           status: "success",
-          duration: 5000,
-          isClosable: true,
         });
       } catch (e) {
         console.log(e);
@@ -96,8 +86,6 @@ const ProfileForm = () => {
           title: "Error",
           description: e,
           status: "error",
-          duration: 5000,
-          isClosable: true,
         });
       } finally {
         setIsUploading(false);
@@ -131,7 +119,7 @@ const ProfileForm = () => {
           <Avatar
             size="2xl"
             name={user.name}
-            src={user.photoUrl}
+            src={user.avatar}
             alignSelf={{ base: "center", md: "left" }}
             top="-30px"
             borderWidth="4px"
@@ -187,4 +175,4 @@ const ProfileForm = () => {
   );
 };
 
-export default ProfileForm;
+export default memo(ProfileForm);

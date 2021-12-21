@@ -29,7 +29,7 @@ const ProfileHeader = ({ user }) => {
           <Avatar
             size="2xl"
             name={user.name}
-            src={user.photoUrl}
+            src={user.avatar}
             alignSelf={{ base: "center", md: "left" }}
             top="-30px"
             borderWidth="4px"

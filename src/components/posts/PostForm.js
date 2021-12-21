@@ -266,7 +266,7 @@ const PostForm = () => {
         py={3}
       >
         <HStack>
-          <PostAvatar name={user.name} src={user.photoUrl} />
+          <PostAvatar name={user.name} src={user.avatar} />
           <Input
             onClick={onPostClick}
             variant="filled"

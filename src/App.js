@@ -4,24 +4,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 
 import { check } from "./features/auth/authSlice";
-import { setPosts } from "./features/posts/postsSlice";
-import { snapshotPosts } from "./backend/posts";
 
 import SideBar from "./components/ui/SideBar";
-import LoadingPage from "./pages/LoadingPage";
-import SignInPage from "./pages/SignInPage";
-import SignUpPage from "./pages/SignUpPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import MainPage from "./pages/MainPage";
-import ProfilePage from "./pages/ProfilePage";
-import PostPage from "./pages/PostPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import VerifyEmailPage from "./pages/VerifyEmailPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+import LoadingPage from "./pages/common/LoadingPage";
+import NotFoundPage from "./pages/common/NotFoundPage";
+import SignInPage from "./pages/auth/SignInPage";
+import SignUpPage from "./pages/auth/SignUpPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import MainPage from "./pages/app/MainPage";
+import ProfilePage from "./pages/app/ProfilePage";
+import PostPage from "./pages/app/PostPage";
 
 const App = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
+  // const user = useSelector((state) => state.auth.user);
   const loaded = useSelector((state) => state.auth.loaded);
   const logged = useSelector((state) => state.auth.logged);
 
@@ -29,24 +27,24 @@ const App = () => {
     dispatch(check());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (user == null) {
-      dispatch(setPosts([]));
-      return;
-    }
+  // useEffect(() => {
+  //   if (user == null) {
+  //     dispatch(setPosts([]));
+  //     return;
+  //   }
 
-    const unsubscribe = snapshotPosts(
-      user.uid,
-      (posts) => {
-        dispatch(setPosts(posts));
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+  //   const unsubscribe = snapshotPosts(
+  //     user.uid,
+  //     (posts) => {
+  //       dispatch(setPosts(posts));
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //     }
+  //   );
 
-    return () => unsubscribe();
-  }, [dispatch, user]);
+  //   return () => unsubscribe();
+  // }, [dispatch, user]);
 
   if (!loaded) {
     return <LoadingPage />;
@@ -77,6 +75,7 @@ const App = () => {
           <Route path="/profile/:uid" element={<ProfilePage />}></Route>
           <Route path="/profile" element={<ProfilePage />}></Route>
           <Route path="/post/:id" element={<PostPage />}></Route>
+          <Route path="/404" element={<NotFoundPage />}></Route>
           <Route path="/" element={<MainPage />}></Route>
           <Route path="*" element={<NotFoundPage />}></Route>
         </Routes>
