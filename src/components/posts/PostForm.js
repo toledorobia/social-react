@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import {
   VStack,
@@ -24,17 +24,14 @@ import {
 import { FiImage, FiMinusCircle } from "react-icons/fi";
 import {
   imageValidation,
-  imageProcessing,
-  generateUniqueId,
   isEmptyString,
 } from "../../libs/helpers";
-import { newPost } from "../../backend/posts";
-import { uploadImage } from "../../backend/storage";
-import mime from "mime-types";
+import { newPost } from "../../features/posts/postsSlice";
 
 import PostAvatar from "./PostAvatar";
 
 const PostForm = () => {
+  const dispatch = useDispatch();
   const toast = useToast();
   const refInputContent = useRef(null);
   const refInputImage = useRef(null);
@@ -44,6 +41,7 @@ const PostForm = () => {
   const [loading, setLoading] = useBoolean(false);
   const [posting, setPosting] = useBoolean(false);
   const [uploading, setUploading] = useBoolean(false);
+  const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const bg = useColorModeValue("white", "gray.700");
   const bgHover = useColorModeValue("white", "gray.700");
@@ -77,25 +75,19 @@ const PostForm = () => {
           throw new Error("Image must be jpeg or png and less than 2MB");
         }
 
-        const image = await imageProcessing(file, {
-          quality: 0.6,
-          type: "image/jpeg",
-          scale: 0.5,
-        });
+        setImage(file);
 
-        const ext = mime.extension(image.type);
-        const fileName = `${generateUniqueId()}.${ext}`;
-
-        const url = await uploadImage(image, "posts", fileName);
-        setImageUrl(url);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImageUrl(e.target.result);
+        };
+        reader.readAsDataURL(file);
       } catch (e) {
         console.log(e);
         toast({
           title: "Error",
           description: e,
           status: "error",
-          duration: 5000,
-          isClosable: true,
         });
       } finally {
         setLoading.off();
@@ -116,32 +108,26 @@ const PostForm = () => {
           throw new Error("Content or image is required");
         }
 
-        console.log("new post", user.uid, content, imageUrl);
+        console.log("new post", content, image);
 
-        await newPost(user.uid, content, imageUrl);
+        await dispatch(newPost({ content, image })).unwrap();
         onClose();
 
         toast({
           title: "Success",
           description: "Post has been created",
           status: "success",
-          duration: 5000,
-          isClosable: true,
         });
       } catch (e) {
         toast({
           title: "Error",
-          description: e,
+          description: e.message,
           status: "error",
-          duration: 5000,
-          isClosable: true,
         });
       } finally {
         setLoading.off();
         setPosting.off();
       }
-
-      console.log(refInputContent.current.innerText);
     },
     [imageUrl, onClose, setLoading, setPosting, toast, user.uid]
   );
@@ -189,11 +175,11 @@ const PostForm = () => {
               />
 
               <Image
+                src={imageUrl}
                 width="100%"
                 maxH="250px"
                 objectFit="cover"
                 align="middle"
-                src={imageUrl}
                 borderRadius="md"
               />
               <HStack alignItems="stretch">

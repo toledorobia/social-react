@@ -18,7 +18,7 @@ export const signIn = (email, password) => {
     axios
       .post("/api/auth/signin", { email, password }, { withoutToken: true })
       .then((response) => {
-        console.log("response", response);
+        // console.log("response", response);
         saveToken(response.data.token);
         resolve(response.data);
       })

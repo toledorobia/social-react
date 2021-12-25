@@ -3,8 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { VStack } from "@chakra-ui/react";
 
-import { setPost } from "../../features/posts/postsSlice";
-import { snapshotPost } from "../../backend/posts";
 import Post from "../../components/posts/Post";
 
 import { isEmptyString } from "../../libs/helpers";
@@ -14,6 +12,7 @@ import LoadingPage from "../common/LoadingPage";
 const PostPage = () => {
   const params = useParams();
   const dispatch = useDispatch();
+  // eslint-disable-next-line no-unused-vars
   const [loaded, setLoaded] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const post = useSelector((state) => state.posts.post);
@@ -23,25 +22,21 @@ const PostPage = () => {
       return;
     }
 
-    const unsubscribe = snapshotPost(
-      params.id,
-      (posts) => {
-        setLoaded(true);
-        dispatch(setPost(posts));
-      },
-      (error) => {
-        console.log("snapshotPost error", error);
-      }
-    );
+    // const unsubscribe = snapshotPost(
+    //   params.id,
+    //   (posts) => {
+    //     setLoaded(true);
+    //     dispatch(setPost(posts));
+    //   },
+    //   (error) => {
+    //     console.log("snapshotPost error", error);
+    //   }
+    // );
 
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-
-    return () => {
-      unsubscribe();
-    };
   }, [params, user, dispatch]);
 
   if (!loaded) {

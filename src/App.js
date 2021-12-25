@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 
 import { check } from "./features/auth/authSlice";
+import { setPosts, getFeed } from "./features/posts/postsSlice";
 
 import SideBar from "./components/ui/SideBar";
 import LoadingPage from "./pages/common/LoadingPage";
@@ -19,7 +20,7 @@ import PostPage from "./pages/app/PostPage";
 
 const App = () => {
   const dispatch = useDispatch();
-  // const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.user);
   const loaded = useSelector((state) => state.auth.loaded);
   const logged = useSelector((state) => state.auth.logged);
 
@@ -27,24 +28,14 @@ const App = () => {
     dispatch(check());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (user == null) {
-  //     dispatch(setPosts([]));
-  //     return;
-  //   }
+  useEffect(() => {
+    if (user == null) {
+      dispatch(setPosts([]));
+      return;
+    }
 
-  //   const unsubscribe = snapshotPosts(
-  //     user.uid,
-  //     (posts) => {
-  //       dispatch(setPosts(posts));
-  //     },
-  //     (error) => {
-  //       console.log(error);
-  //     }
-  //   );
-
-  //   return () => unsubscribe();
-  // }, [dispatch, user]);
+    dispatch(getFeed());
+  }, [dispatch, user]);
 
   if (!loaded) {
     return <LoadingPage />;

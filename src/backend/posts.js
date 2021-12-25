@@ -2,8 +2,6 @@ import {
   getFirestore,
   doc,
   getDoc,
-  addDoc,
-  deleteDoc,
   collection,
   orderBy,
   query,
@@ -20,108 +18,9 @@ import {
 import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
-import store from "../store";
 
-const preparePosts = async (posts) => {
-  let postUsers = [];
+import { axios } from "../libs/http";
 
-  posts.forEach((d) => {
-    postUsers = d.comments.reduce(
-      (acc, curr) => [...acc, curr.uid, ...curr.likes.map((l) => l.uid)],
-      [...postUsers, d.uid, ...d.likes.map((l) => l.uid)]
-    );
-  });
-
-  // await normalizeUsers(postUsers);
-
-  const users = store.getState().users.users;
-  return posts.map((p) => {
-    p.user = users.find((u) => u.uid === p.uid);
-    p.likes = p.likes
-      .map((l) => {
-        l.user = users.find((u) => u.uid === l.uid);
-        l.createdAt = l.createdAt?.toDate();
-        return l;
-      })
-      .sort((a, b) => a.createdAt - b.createdAt);
-    p.comments = p.comments
-      .map((c) => {
-        c.createdAt = c.createdAt?.toDate();
-        c.updatedAt = c.updatedAt?.toDate();
-        c.user = users.find((u) => u.uid === c.uid);
-
-        c.likes = c.likes
-          .map((l) => {
-            l.user = users.find((u) => u.uid === l.uid);
-            l.createdAt = l.createdAt?.toDate();
-            return l;
-          })
-          .sort((a, b) => a.createdAt - b.createdAt);
-
-        return c;
-      })
-      .sort((a, b) => b.createdAt - a.createdAt);
-
-    return p;
-  });
-};
-
-export const snapshotPost = (postId, onSuccess, onError) => {
-  const db = getFirestore();
-
-  return onSnapshot(
-    doc(db, "posts", postId),
-    async (doc) => {
-      if (isSomething(doc.data()) && _.isFunction(onSuccess)) {
-        const items = [firebaseDocToObject(doc)];
-        const posts = await preparePosts(items);
-
-        onSuccess(posts[0]);
-        return;
-      }
-
-      if (_.isFunction(onSuccess)) {
-        onSuccess(null);
-      }
-    },
-    (err) => {
-      if (_.isFunction(onError)) {
-        onError(err);
-      }
-    }
-  );
-};
-
-export const snapshotPosts = (uid, onSuccess, onError) => {
-  const db = getFirestore();
-
-  const q = query(
-    collection(db, "posts"),
-    // where("uid", "==", uid),
-    orderBy("createdAt", "desc")
-  );
-
-  return onSnapshot(
-    q,
-    async (snapshot) => {
-      const items = [];
-      snapshot.forEach((doc) => {
-        items.push(firebaseDocToObject(doc));
-      });
-
-      const posts = await preparePosts(items);
-
-      if (_.isFunction(onSuccess)) {
-        onSuccess(posts);
-      }
-    },
-    (err) => {
-      if (_.isFunction(onError)) {
-        onError(err);
-      }
-    }
-  );
-};
 
 export const snapshotProfilePost = (uid, onSuccess, onError) => {
   const db = getFirestore();
@@ -140,10 +39,10 @@ export const snapshotProfilePost = (uid, onSuccess, onError) => {
         items.push(firebaseDocToObject(doc));
       });
 
-      const posts = await preparePosts(items);
+      // const posts = await preparePosts(items);
 
       if (_.isFunction(onSuccess)) {
-        onSuccess(posts);
+        onSuccess([]);
       }
     },
     (err) => {
@@ -154,94 +53,59 @@ export const snapshotProfilePost = (uid, onSuccess, onError) => {
   );
 };
 
-// export const getPostsProfile = (uid) => {
-//   return new Promise((resolve, reject) => {
-//     const db = getFirestore();
-//     const q = query(
-//       collection(db, "posts"),
-//       where("uid", "==", uid),
-//       orderBy("createdAt", "desc")
-//     );
+export const getFeed = () => {
+  return new Promise((resolve, reject) => {
+    axios.get("/api/posts/feed").then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+};
 
-//     getDocs(q)
-//       .then(async (querySnapshot) => {
-//         const items = [];
-//         querySnapshot.forEach((doc) => {
-//           items.push(firebaseDocToObject(doc));
-//         });
+export const newPost = (content = null, image = null) => {
+  return new Promise((resolve, reject) => {
+    const data = new FormData();
 
-//         const posts = await preparePosts(items);
-//         resolve(posts);
-//       })
-//       .catch((error) => {
-//         reject(error);
-//       });
-//   });
-// };
+    if (isSomething(content)) {
+      data.append("content", content);
+    }
 
-export const newPost = (uid, content, image = null) => {
-  return new Promise((resolve) => {
-    const now = firebaseDateNow();
-    const db = getFirestore();
+    if (isSomething(image)) {
+      data.append("image", image);
+    }
 
-    addDoc(collection(db, "posts"), {
-      uid,
-      content,
-      image,
-      video: null,
-      likes: [],
-      comments: [],
-      createdAt: now,
-      updatedAt: now,
-    })
-      .then((docRef) => {
-        resolve({ id: docRef.id });
-      })
-      .catch((error) => resolve(error));
+    axios.post("/api/posts", data, { 
+      headers: {
+        "Content-Type": "multipart/form-data",
+      } 
+    }).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
   });
 };
 
 export const deletePost = (postId) => {
-  return new Promise((resolve) => {
-    const db = getFirestore();
-
-    deleteDoc(doc(db, "posts", postId))
-      .then(() => {
-        resolve();
-      })
-      .catch((error) => resolve(error));
+  return new Promise((resolve, reject) => {
+    axios.delete(`/api/posts/${postId}`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
   });
 };
 
-export const toggleLike = (postId, uid, like = false) => {
+export const toggleLike = (postId) => {
   return new Promise((resolve, reject) => {
-    const now = firebaseDateNow();
-    const db = getFirestore();
-    const ref = doc(db, "posts", postId);
-
-    getDoc(ref).then((doc) => {
-      const likes = doc.data().likes;
-      const likesIndex = likes.findIndex((l) => l.uid === uid);
-
-      if (like === true && likesIndex === -1) {
-        likes.push({
-          uid,
-          createdAt: now,
-        });
-      } else if (like === false) {
-        likes.splice(likesIndex, 1);
-      }
-
-      updateDoc(ref, {
-        likes,
-      })
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    axios.put(`/api/posts/${postId}/like`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
     });
+
+
   });
 };
 

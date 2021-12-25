@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link as LinkRouter } from "react-router-dom";
 import {
   HStack,
@@ -18,10 +18,11 @@ import PostAvatar from "./PostAvatar";
 import MenuItemConfirm from "../ui/MenuItemConfirm";
 import { FiMenu, FiTrash2 } from "react-icons/fi";
 import { dateFormat, dateFromNow } from "../../libs/helpers";
-import { deletePost } from "../../backend/posts";
+import { deletePost } from "../../features/posts/postsSlice";
 
 const PostHeader = ({ postId, createdAt, postUser }) => {
   const toast = useToast();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useBoolean(false);
   const isOwner = user && user.uid === postUser.uid;
@@ -33,15 +34,19 @@ const PostHeader = ({ postId, createdAt, postUser }) => {
 
     try {
       setLoading.on();
-      await deletePost(postId);
+      await dispatch(deletePost(postId)).unwrap();
+
+      toast({
+        title: "Post Deleted",
+        description: "Your post has been deleted.",
+        status: "info",
+      });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
         description: error.message,
         status: "error",
-        duration: 5000,
-        isClosable: true,
       });
       setLoading.off();
     }

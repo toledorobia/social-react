@@ -3,12 +3,6 @@ import { useSelector } from "react-redux";
 import { VStack } from "@chakra-ui/react";
 import { Post } from "../../components/posts";
 import PostForm from "../../components/posts/PostForm";
-// import posts from "../data/posts";
-
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
-dayjs.extend(relativeTime);
 
 const MainPage = () => {
   const posts = useSelector((state) => state.posts.posts);
