@@ -104,8 +104,6 @@ export const toggleLike = (postId) => {
     }).catch((err) => {
       reject(err);
     });
-
-
   });
 };
 

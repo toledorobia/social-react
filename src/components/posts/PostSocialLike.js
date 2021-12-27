@@ -1,20 +1,21 @@
 import React, { memo, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 import { Button, useBoolean } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
-import { toggleLike } from "../../backend/posts";
+import { toggleLike } from "../../features/posts/postsSlice";
 
 const PostSocialLike = ({ postId, likes }) => {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useBoolean(false);
   const user = useSelector((state) => state.auth.user);
-  const isLike = likes.find((l) => l.uid === user.uid) != null;
+  const isLike = likes.find((l) => l.user._id === user.id) != null;
 
   const handleLike = useCallback(async () => {
     setLoading.on();
     try {
-      await toggleLike(postId, user.uid, !isLike);
+      await dispatch(toggleLike(postId)).unwrap();
     } catch (error) {
       console.error(error);
     } finally {

@@ -3,6 +3,7 @@ import {
   newPost as newPostBackend,
   getFeed as getFeedBackend,
   deletePost as deletePostBackend,
+  toggleLike as toggleLikeBackend,
 } from "../../backend/posts";
 
 export const getFeed = createAsyncThunk(
@@ -41,6 +42,18 @@ export const deletePost = createAsyncThunk(
   }
 );
 
+export const toggleLike = createAsyncThunk(
+  "posts/like",
+  async (payload, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const data = await toggleLikeBackend(payload);
+      return fulfillWithValue(data);
+    } catch (error) {
+      throw rejectWithValue(error);
+    }
+  }
+);
+
 const initialState = {
   post: null,
   posts: [],
@@ -66,7 +79,6 @@ export const postsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getFeed.fulfilled, (state, action) => {
-        console.log("getFeed.fulfilled", action.payload);
         state.posts = action.payload;
       })
       .addCase(newPost.fulfilled, (state, action) => {
@@ -77,6 +89,14 @@ export const postsSlice = createSlice({
         const index = state.posts.findIndex((p) => p.id === id);
         if (index !== -1) {
           state.posts.splice(index, 1);
+        }
+      })
+      .addCase(toggleLike.fulfilled, (state, action) => {
+        console.log("toggleLike", action.payload);
+        const post = action.payload;
+        const index = state.posts.findIndex((p) => p.id === post.id);
+        if (index !== -1) {
+          state.posts[index] = post;
         }
       })
   },
