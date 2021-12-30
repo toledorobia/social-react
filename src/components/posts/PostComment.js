@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Link as LinkRouter } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import {
   HStack,
@@ -14,17 +14,20 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
-import { toggleLikeComment, deleteComment } from "../../backend/posts";
+import { deleteComment } from "../../backend/posts";
 import PostAvatar from "./PostAvatar";
 import PostLikesList from "./PostLikesList";
 import LinkConfirm from "../ui/LinkConfirm";
 import { dateFormat, dateFromNow } from "../../libs/helpers";
 
+import { toggleCommentLike } from "../../features/posts/postsSlice";
+
 const PostComment = ({ postId, comment }) => {
-  const [loading, setLoading] = useBoolean(false);
+  const dispatch = useDispatch();
   const toast = useToast();
   const user = useSelector((state) => state.auth.user);
   const bg = useColorModeValue("gray.200", "gray.700");
+  const [loading, setLoading] = useBoolean(false);
 
   const ownComment = user && user.uid === comment.uid;
   const isLike = comment.likes.find((l) => l.uid === user.uid) != null;
@@ -36,7 +39,7 @@ const PostComment = ({ postId, comment }) => {
 
     setLoading.on();
     try {
-      await toggleLikeComment(postId, comment.id, user.uid, !isLike);
+      await dispatch(toggleCommentLike({ postId, commentId: comment.id })).unwrap();
     } catch (error) {
       console.error(error);
     } finally {
@@ -70,7 +73,7 @@ const PostComment = ({ postId, comment }) => {
       <HStack spacing={2} alignItems="start">
         <PostAvatar
           size="sm"
-          src={comment.user.photoUrl}
+          src={comment.user.avatar}
           name={comment.user.name}
         />
         <VStack flex={1} spacing={0} alignItems="stretch">
@@ -84,7 +87,7 @@ const PostComment = ({ postId, comment }) => {
           >
             <Link
               as={LinkRouter}
-              to={"/profile/" + comment.user.uid}
+              to={"/profile/" + comment.user.userId}
               fontWeight="bold"
               fontSize="xs"
             >

@@ -1,19 +1,30 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, memo } from "react";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { VStack, HStack, Link } from "@chakra-ui/react";
 import PostCommentForm from "./PostCommentForm";
 import PostAvatar from "./PostAvatar";
 import PostComment from "./PostComment";
+import { postComments } from "../../features/posts/postsSlice";
+import { isEqual } from "lodash";
 
-const PostComments = ({ postId, comments, forceFocus, showAll }) => {
-  console.log("PostComments", postId, forceFocus, showAll);
+const PostComments = ({ post, forceFocus, showAll }) => {
+  console.log("PostComments", post.id, forceFocus, showAll);
+
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [number, setNumber] = useState(2);
 
+  useEffect(() => {
+    if (post.commentsLoaded == false) {
+      dispatch(postComments(post.id));
+    }
+  }, [post.commentsLoaded]);
+
   const _comments = useMemo(() => {
-    return comments.slice(0, number);
-  }, [comments, number]);
+    console.log("post.comments", post.comments);
+    return post.comments.slice(0, number);
+  }, [post.comments, number]);
 
   const onMoreComments = () => {
     setNumber(number + 10);
@@ -27,21 +38,21 @@ const PostComments = ({ postId, comments, forceFocus, showAll }) => {
             size="sm"
             alignSelf="center"
             name={user.name}
-            src={user.photoUrl}
+            src={user.avatar}
           />
-          <PostCommentForm postId={postId} forceFocus={forceFocus} />
+          <PostCommentForm postId={post.id} forceFocus={forceFocus} />
         </HStack>
         {!showAll &&
           _comments.map((comment) => (
-            <PostComment key={comment.id} postId={postId} comment={comment} />
+            <PostComment key={comment.id} postId={post.id} comment={comment} />
           ))}
 
         {showAll &&
-          comments.map((comment) => (
-            <PostComment key={comment.id} postId={postId} comment={comment} />
+          post.comments.map((comment) => (
+            <PostComment key={comment.id} postId={post.id} comment={comment} />
           ))}
 
-        {!showAll && number < comments.length && (
+        {!showAll && number < post.comments.length && (
           <Link
             fontSize="sm"
             fontWeight="bold"
@@ -57,10 +68,13 @@ const PostComments = ({ postId, comments, forceFocus, showAll }) => {
 };
 
 PostComments.propTypes = {
-  postId: PropTypes.string.isRequired,
-  comments: PropTypes.arrayOf(PropTypes.object).isRequired,
+  post: PropTypes.object.isRequired,
   forceFocus: PropTypes.number.isRequired,
   showAll: PropTypes.bool.isRequired,
 };
 
-export default PostComments;
+export default memo(PostComments, (prevProps, nextProps) => {
+  return prevProps.forceFocus === nextProps.forceFocus
+   && prevProps.showAll === nextProps.showAll 
+   && isEqual(prevProps.post.comments, nextProps.post.comments);
+});

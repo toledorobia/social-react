@@ -55,7 +55,7 @@ const PostHeader = ({ postId, createdAt, postUser }) => {
   return (
     <>
       <HStack px={4} pt={3}>
-        <PostAvatar name={postUser.name} src={postUser.photoUrl} />
+        <PostAvatar name={postUser.name} src={postUser.avatar} />
         <VStack spacing={0} alignItems="start" flex={1}>
           <Link
             as={LinkRouter}
@@ -102,7 +102,7 @@ const PostHeader = ({ postId, createdAt, postUser }) => {
 
 PostHeader.propTypes = {
   postId: PropTypes.string.isRequired,
-  createdAt: PropTypes.instanceOf(Date).isRequired,
+  createdAt: PropTypes.string.isRequired,
   postUser: PropTypes.object.isRequired,
 };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { useCallback, } from "react";
 import { getAuth, signOut, } from "firebase/auth";
-import { useSelector, } from "react-redux";
+// import { useSelector, } from "react-redux";
 
 import {
   Box,
@@ -18,11 +18,11 @@ import {
   useColorModeValue,
   Stack,
 } from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon, AddIcon, } from '@chakra-ui/icons';
+import { HamburgerIcon, CloseIcon, } from '@chakra-ui/icons';
 
 const NavBar = () => {
   const auth = getAuth();
-  const user = useSelector((state) => state.auth.user);
+  // const user = useSelector((state) => state.auth.user);
   const { isOpen, onOpen, onClose, } = useDisclosure();
 
   const handleSignOut = useCallback(async () => {

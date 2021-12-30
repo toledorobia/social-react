@@ -17,7 +17,7 @@ import PostComments from "./PostComments";
 import PostSocialLike from "./PostSocialLike";
 import PostLikesList from "./PostLikesList";
 
-const PostSocial = ({ postId, comments, likes, showAll }) => {
+const PostSocial = ({ post, showAll }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [forceFocus, setForceFocus] = useState(0);
 
@@ -49,15 +49,15 @@ const PostSocial = ({ postId, comments, likes, showAll }) => {
         <HStack alignItems="flex-end">
           <HStack spacing={1}>
             <Icon as={MdFavorite} color="red.500" boxSize="1.2em" />
-            <PostLikesList likes={likes} fontSize="sm" />
+            <PostLikesList likes={post.likes} fontSize="sm" />
           </HStack>
           <Spacer />
           <Link fontSize="sm" onClick={toggleComments}>
-            {comments.length} comments
+            {post.commentsCount} comments
           </Link>
         </HStack>
         <HStack>
-          <PostSocialLike postId={postId} likes={likes} />
+          <PostSocialLike postId={post.id} likes={post.likes} />
           <Button
             onClick={forceComment}
             leftIcon={<MdModeComment />}
@@ -72,8 +72,7 @@ const PostSocial = ({ postId, comments, likes, showAll }) => {
         </HStack>
         {isOpen && (
           <PostComments
-            comments={comments}
-            postId={postId}
+            post={post}
             forceFocus={forceFocus}
             showAll={showAll}
           />
@@ -84,9 +83,7 @@ const PostSocial = ({ postId, comments, likes, showAll }) => {
 };
 
 PostSocial.propTypes = {
-  postId: PropTypes.string.isRequired,
-  comments: PropTypes.arrayOf(PropTypes.object).isRequired,
-  likes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  post: PropTypes.object.isRequired,
   showAll: PropTypes.bool.isRequired,
 };
 

@@ -7,16 +7,13 @@ import {
   query,
   where,
   onSnapshot,
-  arrayUnion,
   updateDoc,
 } from "firebase/firestore";
 import {
-  firebaseDateNow,
   firebaseDocToObject,
   isSomething,
 } from "../libs/helpers";
 import _ from "lodash";
-import { v4 as uuidv4 } from "uuid";
 
 
 import { axios } from "../libs/http";
@@ -107,41 +104,12 @@ export const toggleLike = (postId) => {
   });
 };
 
-export const toggleLikeComment = (postId, commentId, uid, like = false) => {
+export const toggleCommentLike = (postId, commentId) => {
   return new Promise((resolve, reject) => {
-    const now = firebaseDateNow();
-    const db = getFirestore();
-    const ref = doc(db, "posts", postId);
-
-    getDoc(ref).then((doc) => {
-      const comments = doc.data().comments;
-      const commentIndex = comments.findIndex((c) => c.id === commentId);
-      const comment = comments.find((c) => c.id === commentId);
-
-      const likes = comment.likes;
-      const likesIndex = likes.findIndex((l) => l.uid === uid);
-
-      if (like === true && likesIndex === -1) {
-        likes.push({
-          uid,
-          createdAt: now,
-        });
-      } else if (like === false) {
-        likes.splice(likesIndex, 1);
-      }
-
-      comment.likes = likes;
-      comments[commentIndex] = comment;
-
-      updateDoc(ref, {
-        comments,
-      })
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    axios.put(`/api/posts/${postId}/comments/${commentId}/like`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
     });
   });
 };
@@ -174,27 +142,33 @@ export const deleteComment = (postId, commentId) => {
   });
 };
 
-export const newPostComment = (postId, uid, content) => {
+export const newPostComment = (postId, content) => {
   return new Promise((resolve, reject) => {
-    const now = firebaseDateNow();
-    const db = getFirestore();
-    const ref = doc(db, "posts", postId);
-
-    updateDoc(ref, {
-      comments: arrayUnion({
-        id: uuidv4(),
-        uid,
-        content,
-        likes: [],
-        createdAt: now,
-        updatedAt: null,
-      }),
-    })
-      .then(() => {
-        resolve();
-      })
-      .catch((error) => {
-        reject(error);
-      });
+    axios.post(`/api/posts/${postId}/comments`, { content }).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
   });
 };
+
+export const postComments = (postId) => {
+  return new Promise((resolve, reject) => {
+    axios.get(`/api/posts/${postId}/comments`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+};
+
+export const likePostComment = (postId, commentId) => {
+  return new Promise((resolve, reject) => {
+    axios.put(`/api/posts/${postId}/comments/${commentId}/like`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+};
+

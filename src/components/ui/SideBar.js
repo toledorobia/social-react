@@ -104,6 +104,7 @@ SidebarContent.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
+// const NavItem = ({ to, onClick, icon, children, ...rest }) => {
 const NavItem = ({ to, onClick, icon, children, ...rest }) => {
   if (onClick != null) {
     return (
@@ -173,7 +174,7 @@ const NavItem = ({ to, onClick, icon, children, ...rest }) => {
 };
 
 NavItem.propTypes = {
-  to: PropTypes.string.isRequired,
+  to: PropTypes.string,
   onClick: PropTypes.func,
   icon: PropTypes.elementType,
   children: PropTypes.node.isRequired,

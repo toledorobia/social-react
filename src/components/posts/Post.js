@@ -35,9 +35,7 @@ const Post = ({ post, showAll }) => {
           video={post.video}
         />
         <PostSocial
-          postId={post.id}
-          comments={post.comments}
-          likes={post.likes}
+          post={post}
           showAll={showAll}
         />
       </VStack>

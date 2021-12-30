@@ -1,12 +1,13 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Box, useColorModeValue, useBoolean, useToast } from "@chakra-ui/react";
 
-import { newPostComment } from "../../backend/posts";
+import { newPostComment } from "../../features/posts/postsSlice";
 import { isEmptyString } from "../../libs/helpers";
 
 const PostCommentForm = ({ postId, forceFocus }) => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const toast = useToast();
   const [loading, setLoading] = useBoolean(false);
@@ -34,21 +35,17 @@ const PostCommentForm = ({ postId, forceFocus }) => {
           throw new Error("Comment cannot be empty");
         }
 
-        await newPostComment(postId, user.uid, content);
+        await dispatch(newPostComment({ postId, content })).unwrap();
         toast({
           title: "Success",
           description: "Comment posted",
           status: "success",
-          duration: 5000,
-          isClosable: true,
         });
       } catch (e) {
         toast({
           title: "Error",
           description: e,
           status: "error",
-          duration: 5000,
-          isClosable: true,
         });
       } finally {
         setLoading.off();
