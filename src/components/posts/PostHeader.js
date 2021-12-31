@@ -25,8 +25,8 @@ const PostHeader = ({ postId, createdAt, postUser }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useBoolean(false);
-  const isOwner = user && user.uid === postUser.uid;
-
+  const isOwner = user && user.id === postUser.userId;
+  
   const handleDelete = useCallback(async () => {
     if (loading) {
       return;
@@ -59,7 +59,7 @@ const PostHeader = ({ postId, createdAt, postUser }) => {
         <VStack spacing={0} alignItems="start" flex={1}>
           <Link
             as={LinkRouter}
-            to={"/profile/" + postUser.uid}
+            to={"/profile/" + postUser.id}
             fontWeight="bold"
           >
             {postUser.name}

@@ -7,7 +7,9 @@ import ProfileHeader from "../../components/profile/ProfileHeader";
 import Post from "../../components/posts/Post";
 import PostForm from "../../components/posts/PostForm";
 import ProfileForm from "../../components/profile/ProfileForm";
+import LoadingPage from "./../common/LoadingPage";
 import { getProfile } from "../../features/users/usersSlice";
+import { getProfileFeed, setProfilePosts } from "../../features/posts/postsSlice";
 import { isEmptyString } from "../../libs/helpers";
 
 const ProfilePage = () => {
@@ -16,8 +18,7 @@ const ProfilePage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const profile = useSelector((state) => state.users.profile);
-  // const profilePosts = useSelector((state) => state.posts.profilePosts);
-  const profilePosts = [];
+  const profilePosts = useSelector((state) => state.posts.profilePosts);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
@@ -34,32 +35,23 @@ const ProfilePage = () => {
     }
   }, [params, user, dispatch]);
 
-  // useEffect(() => {
-  //   if (profileUser == null) {
-  //     dispatch(setProfilePosts([]));
-  //     return;
-  //   }
+  useEffect(() => {
+    if (profile == null) {
+      dispatch(setProfilePosts([]));
+      return;
+    }
 
-  //   const unsubscribe = snapshotProfilePost(
-  //     profileUser.uid,
-  //     (posts) => {
-  //       dispatch(setProfilePosts(posts));
-  //     },
-  //     (error) => {
-  //       console.log("snapshotProfilePost error", error);
-  //     }
-  //   );
+    dispatch(getProfileFeed(profile.id)).unwrap();
 
-  //   window.scrollTo({
-  //     top: 0,
-  //     behavior: "smooth",
-  //   });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [dispatch, profile]);
 
-  //   return () => {
-  //     console.log("unsubscribe useEffect");
-  //     unsubscribe();
-  //   };
-  // }, [dispatch, profileUser]);
+  if (profile == null) {
+    return <LoadingPage />;
+  }
 
   return (
     <>

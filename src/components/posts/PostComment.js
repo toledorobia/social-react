@@ -14,13 +14,12 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
-import { deleteComment } from "../../backend/posts";
 import PostAvatar from "./PostAvatar";
 import PostLikesList from "./PostLikesList";
 import LinkConfirm from "../ui/LinkConfirm";
 import { dateFormat, dateFromNow } from "../../libs/helpers";
 
-import { toggleCommentLike } from "../../features/posts/postsSlice";
+import { toggleCommentLike, deletePostComment } from "../../features/posts/postsSlice";
 
 const PostComment = ({ postId, comment }) => {
   const dispatch = useDispatch();
@@ -54,15 +53,18 @@ const PostComment = ({ postId, comment }) => {
 
     try {
       setLoading.on();
-      await deleteComment(postId, comment.id);
+      await dispatch(deletePostComment({ postId, commentId: comment.id })).unwrap();
+      toast({
+        title: "Comment deleted",
+        description: "The comment has been deleted.",
+        status: "info",
+      });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
         description: error.message,
         status: "error",
-        duration: 5000,
-        isClosable: true,
       });
       setLoading.off();
     }
@@ -87,7 +89,7 @@ const PostComment = ({ postId, comment }) => {
           >
             <Link
               as={LinkRouter}
-              to={"/profile/" + comment.user.userId}
+              to={"/profile/" + comment.user.id}
               fontWeight="bold"
               fontSize="xs"
             >

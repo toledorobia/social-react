@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { 
-  newPost as newPostBackend,
   getFeed as getFeedBackend,
+  getProfileFeed as getProfileFeedBackend,
+  newPost as newPostBackend,
   deletePost as deletePostBackend,
   toggleLike as toggleLikeBackend,
-  newPostComment as newPostCommentBackend,
   postComments as postCommentsBackend,
+  newPostComment as newPostCommentBackend,
+  deletePostComment as deletePostCommentBackend,
   toggleCommentLike as toggleCommentLikeBackend,
 } from "../../backend/posts";
 
@@ -14,6 +16,18 @@ export const getFeed = createAsyncThunk(
   async (_, { fulfillWithValue, rejectWithValue }) => {
     try {
       const data = await getFeedBackend();
+      return fulfillWithValue(data);
+    } catch (error) {
+      throw rejectWithValue(error);
+    }
+  }
+);
+
+export const getProfileFeed = createAsyncThunk(
+  "posts/profile",
+  async (payload, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const data = await getProfileFeedBackend(payload);
       return fulfillWithValue(data);
     } catch (error) {
       throw rejectWithValue(error);
@@ -57,6 +71,18 @@ export const toggleLike = createAsyncThunk(
   }
 );
 
+export const postComments = createAsyncThunk(
+  "posts/comments",
+  async (payload, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const data = await postCommentsBackend(payload);
+      return fulfillWithValue({ postId: payload, comments: data });
+    } catch (error) {
+      throw rejectWithValue(error);
+    }
+  }
+);
+
 export const newPostComment = createAsyncThunk(
   "posts/commentCreate",
   async (payload, { fulfillWithValue, rejectWithValue }) => {
@@ -70,12 +96,13 @@ export const newPostComment = createAsyncThunk(
   }
 );
 
-export const postComments = createAsyncThunk(
-  "posts/comments",
+export const deletePostComment = createAsyncThunk(
+  "posts/commentDelete",
   async (payload, { fulfillWithValue, rejectWithValue }) => {
     try {
-      const data = await postCommentsBackend(payload);
-      return fulfillWithValue({ postId: payload, comments: data });
+      const { postId, commentId } = payload;
+      const data = await deletePostCommentBackend(postId, commentId);
+      return fulfillWithValue(data);
     } catch (error) {
       throw rejectWithValue(error);
     }
@@ -87,9 +114,8 @@ export const toggleCommentLike = createAsyncThunk(
   async (payload, { fulfillWithValue, rejectWithValue }) => {
     try {
       const { postId, commentId } = payload;
-
       const data = await toggleCommentLikeBackend(postId, commentId);
-      return fulfillWithValue({ postId, commentId, comment: data });
+      return fulfillWithValue(data);
     } catch (error) {
       throw rejectWithValue(error);
     }
@@ -121,7 +147,10 @@ export const postsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getFeed.fulfilled, (state, action) => {
-        state.posts = action.payload.map((post) => ({ ...post, commentsLoaded: false }));
+        state.posts = action.payload;
+      })
+      .addCase(getProfileFeed.fulfilled, (state, action) => {
+        state.profilePosts = action.payload;
       })
       .addCase(newPost.fulfilled, (state, action) => {
         state.posts.unshift({ ...action.payload, commentsLoaded: false });
@@ -166,15 +195,28 @@ export const postsSlice = createSlice({
         }
       })
       .addCase(toggleCommentLike.fulfilled, (state, action) => {
-        const { postId, commentId, comment } = action.payload;
-        console.log("payload", action.payload);
-        const index = state.posts.findIndex((p) => p.id === postId);
+        const comment = action.payload;
+        const index = state.posts.findIndex((p) => p.id === comment.postId);
 
         if (index !== -1) {
           const post = state.posts[index];
-          const commentIndex = post.comments.findIndex((c) => c.id === commentId);
+          const commentIndex = post.comments.findIndex((c) => c.id === comment.id);
           if (commentIndex !== -1) {  
             post.comments[commentIndex] = comment;  
+            state.posts[index] = post;
+          }
+        }
+      })
+      .addCase(deletePostComment.fulfilled, (state, action) => {
+        const comment = action.payload;
+        const index = state.posts.findIndex((p) => p.id === comment.postId);
+
+        if (index !== -1) {
+          const post = state.posts[index];
+          const commentIndex = post.comments.findIndex((c) => c.id === comment.id);
+          if (commentIndex !== -1) {
+            post.commentsCount--;
+            post.comments.splice(commentIndex, 1);  
             state.posts[index] = post;
           }
         }

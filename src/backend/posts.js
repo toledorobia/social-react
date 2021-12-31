@@ -1,58 +1,19 @@
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  collection,
-  orderBy,
-  query,
-  where,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
-import {
-  firebaseDocToObject,
-  isSomething,
-} from "../libs/helpers";
-import _ from "lodash";
-
-
+import { isSomething } from "../libs/helpers";
 import { axios } from "../libs/http";
-
-
-export const snapshotProfilePost = (uid, onSuccess, onError) => {
-  const db = getFirestore();
-
-  const q = query(
-    collection(db, "posts"),
-    where("uid", "==", uid),
-    orderBy("createdAt", "desc")
-  );
-
-  return onSnapshot(
-    q,
-    async (snapshot) => {
-      const items = [];
-      snapshot.forEach((doc) => {
-        items.push(firebaseDocToObject(doc));
-      });
-
-      // const posts = await preparePosts(items);
-
-      if (_.isFunction(onSuccess)) {
-        onSuccess([]);
-      }
-    },
-    (err) => {
-      if (_.isFunction(onError)) {
-        onError(err);
-      }
-    }
-  );
-};
 
 export const getFeed = () => {
   return new Promise((resolve, reject) => {
     axios.get("/api/posts/feed").then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+};
+
+export const getProfileFeed = (userId) => {
+  return new Promise((resolve, reject) => {
+    axios.get(`/api/posts/profile/${userId}`).then((res) => {
       resolve(res.data);
     }).catch((err) => {
       reject(err);
@@ -104,40 +65,12 @@ export const toggleLike = (postId) => {
   });
 };
 
-export const toggleCommentLike = (postId, commentId) => {
+export const postComments = (postId) => {
   return new Promise((resolve, reject) => {
-    axios.put(`/api/posts/${postId}/comments/${commentId}/like`).then((res) => {
+    axios.get(`/api/posts/${postId}/comments`).then((res) => {
       resolve(res.data);
     }).catch((err) => {
       reject(err);
-    });
-  });
-};
-
-export const deleteComment = (postId, commentId) => {
-  return new Promise((resolve, reject) => {
-    const db = getFirestore();
-    const ref = doc(db, "posts", postId);
-
-    getDoc(ref).then((doc) => {
-      const comments = doc.data().comments;
-      const commentIndex = comments.findIndex((c) => c.id === commentId);
-
-      if (commentIndex === -1) {
-        resolve();
-      } else {
-        comments.splice(commentIndex, 1);
-
-        updateDoc(ref, {
-          comments,
-        })
-          .then(() => {
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      }
     });
   });
 };
@@ -152,9 +85,9 @@ export const newPostComment = (postId, content) => {
   });
 };
 
-export const postComments = (postId) => {
+export const deletePostComment = (postId, commentId) => {
   return new Promise((resolve, reject) => {
-    axios.get(`/api/posts/${postId}/comments`).then((res) => {
+    axios.delete(`/api/posts/${postId}/comments/${commentId}`).then((res) => {
       resolve(res.data);
     }).catch((err) => {
       reject(err);
@@ -162,7 +95,7 @@ export const postComments = (postId) => {
   });
 };
 
-export const likePostComment = (postId, commentId) => {
+export const toggleCommentLike = (postId, commentId) => {
   return new Promise((resolve, reject) => {
     axios.put(`/api/posts/${postId}/comments/${commentId}/like`).then((res) => {
       resolve(res.data);
@@ -171,4 +104,3 @@ export const likePostComment = (postId, commentId) => {
     });
   });
 };
-

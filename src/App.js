@@ -63,7 +63,7 @@ const App = () => {
     <>
       <SideBar>
         <Routes>
-          <Route path="/profile/:uid" element={<ProfilePage />}></Route>
+          <Route path="/profile/:id" element={<ProfilePage />}></Route>
           <Route path="/profile" element={<ProfilePage />}></Route>
           <Route path="/post/:id" element={<PostPage />}></Route>
           <Route path="/404" element={<NotFoundPage />}></Route>
