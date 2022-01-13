@@ -9,7 +9,7 @@ import "@fontsource/lato/400.css";
 import "./index.scss";
 import App from "./App";
 
-import theme from "./chakra.theme";
+import theme from "./theme/chakra.theme";
 import "./firebase";
 import store from "./store";
 

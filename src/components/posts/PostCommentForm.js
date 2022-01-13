@@ -11,7 +11,6 @@ const PostCommentForm = ({ postId, forceFocus }) => {
   const user = useSelector((state) => state.auth.user);
   const toast = useToast();
   const [loading, setLoading] = useBoolean(false);
-  const bg = useColorModeValue("gray.200", "gray.700");
   const refInputContent = useRef(null);
 
   useEffect(() => {
@@ -63,7 +62,7 @@ const PostCommentForm = ({ postId, forceFocus }) => {
         w="100%"
         maxW="100%"
         overflow="hidden"
-        bg={bg}
+        bg={useColorModeValue("gray.200", "gray.600")}
         borderRadius="lg"
         borderWidth={0}
         py={2}
@@ -75,7 +74,7 @@ const PostCommentForm = ({ postId, forceFocus }) => {
         _empty={{
           _before: {
             content: '"Write a comment..."',
-            color: "gray.500",
+            color: useColorModeValue("gray.500", "gray.400"),
             cursor: "text",
           },
         }}

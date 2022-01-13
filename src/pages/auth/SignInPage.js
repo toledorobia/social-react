@@ -30,13 +30,20 @@ const SignInPage = () => {
     try {
       await dispatch(signIn({ email, password })).unwrap();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
+      if (error.response.status == 429) {
+        toast({
+          title: "Too many requests",
+          description: "Please wait a bit before trying again",
+          status: "error",
+        });
+      }
+      else {
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+        });
+      }
     }
   };
 

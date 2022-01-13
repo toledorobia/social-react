@@ -157,7 +157,7 @@ const PostForm = () => {
                 bg={bg}
                 borderRadius="md"
                 borderWidth={1}
-                borderColor="gray.200"
+                borderColor={useColorModeValue("gray.200", "gray.600")}
                 py={2}
                 px={3}
                 _focus={{
@@ -192,7 +192,7 @@ const PostForm = () => {
                     rightIcon={<FiImage />}
                     colorScheme="gray"
                     variant="outline"
-                    color="gray.600"
+                    color={useColorModeValue("gray.600", "gray.400")}
                   >
                     Image
                     <VisuallyHiddenInput
@@ -210,7 +210,7 @@ const PostForm = () => {
                     rightIcon={<FiMinusCircle />}
                     colorScheme="gray"
                     variant="outline"
-                    color="gray.600"
+                    color={useColorModeValue("gray.600", "gray.400")}
                     onClick={onRemoveImage}
                   >
                     Remove Image
@@ -229,7 +229,7 @@ const PostForm = () => {
             >
               Post
             </Button>
-            <Button onClick={onClose} isDisabled={loading}>
+            <Button variant="secondary" onClick={onClose} isDisabled={loading}>
               Close
             </Button>
           </ModalFooter>

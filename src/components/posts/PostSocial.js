@@ -10,6 +10,7 @@ import {
   Link,
   Button,
   useDisclosure,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { MdFavorite, MdModeComment } from "react-icons/md";
 import { randomNumber } from "../../libs/helpers";
@@ -18,7 +19,10 @@ import PostSocialLike from "./PostSocialLike";
 import PostLikesList from "./PostLikesList";
 
 const PostSocial = ({ post, showAll }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  console.log("PostSocial", post.id, showAll);
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    defaultIsOpen: showAll,
+  });
   const [forceFocus, setForceFocus] = useState(0);
 
   const toggleComments = () => {
@@ -32,6 +36,7 @@ const PostSocial = ({ post, showAll }) => {
   };
 
   const forceComment = () => {
+    console.log("forceComment", isOpen);
     setForceFocus(randomNumber(1, 10000));
     if (!isOpen) {
       onOpen();
@@ -44,7 +49,7 @@ const PostSocial = ({ post, showAll }) => {
         px={4}
         pb={2}
         alignItems="stretch"
-        divider={<StackDivider borderColor="gray.200" />}
+        divider={<StackDivider borderColor={useColorModeValue("gray.200", "gray.600")} />}
       >
         <HStack alignItems="flex-end">
           <HStack spacing={1}>
@@ -65,7 +70,7 @@ const PostSocial = ({ post, showAll }) => {
             variant="ghost"
             size="sm"
             flex={1}
-            color="gray.600"
+            color={useColorModeValue("gray.600", "gray.400")}
           >
             Comment
           </Button>

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { 
   getFeed as getFeedBackend,
   getProfileFeed as getProfileFeedBackend,
+  getPost as getPostBackend,
   newPost as newPostBackend,
   deletePost as deletePostBackend,
   toggleLike as toggleLikeBackend,
@@ -28,6 +29,18 @@ export const getProfileFeed = createAsyncThunk(
   async (payload, { fulfillWithValue, rejectWithValue }) => {
     try {
       const data = await getProfileFeedBackend(payload);
+      return fulfillWithValue(data);
+    } catch (error) {
+      throw rejectWithValue(error);
+    }
+  }
+);
+
+export const getPost = createAsyncThunk(
+  "posts/get",
+  async (payload, { fulfillWithValue, rejectWithValue }) => {
+    try {
+      const data = await getPostBackend(payload);
       return fulfillWithValue(data);
     } catch (error) {
       throw rejectWithValue(error);
@@ -149,6 +162,9 @@ export const postsSlice = createSlice({
       .addCase(getFeed.fulfilled, (state, action) => {
         state.posts = action.payload;
       })
+      .addCase(getPost.fulfilled, (state, action) => {
+        state.post = action.payload;
+      })
       .addCase(getProfileFeed.fulfilled, (state, action) => {
         state.profilePosts = action.payload;
       })
@@ -170,6 +186,10 @@ export const postsSlice = createSlice({
           p.likes = post.likes;
           state.posts[index] = p;
         }
+
+        if (state.post && state.post.id === post.id) {
+          state.post.likes = post.likes;
+        }
       })
       .addCase(newPostComment.fulfilled, (state, action) => {
         const comment = action.payload;
@@ -181,6 +201,12 @@ export const postsSlice = createSlice({
           post.commentsCount++;
           post.commentsLoaded = true;
           state.posts[index] = post;
+        }
+
+        if (state.post && state.post.id === comment.postId) {
+          state.post.comments.unshift(comment);
+          state.post.commentsCount++;
+          state.post.commentsLoaded = true;
         }
       })
       .addCase(postComments.fulfilled, (state, action) => {
@@ -206,6 +232,13 @@ export const postsSlice = createSlice({
             state.posts[index] = post;
           }
         }
+
+        if (state.post && state.post.id === comment.postId) {
+          const commentIndex = state.post.comments.findIndex((c) => c.id === comment.id);
+          if (commentIndex !== -1) {
+            state.post.comments[commentIndex] = comment;
+          }
+        }
       })
       .addCase(deletePostComment.fulfilled, (state, action) => {
         const comment = action.payload;
@@ -218,6 +251,14 @@ export const postsSlice = createSlice({
             post.commentsCount--;
             post.comments.splice(commentIndex, 1);  
             state.posts[index] = post;
+          }
+        }
+
+        if (state.post && state.post.id === comment.postId) {
+          const commentIndex = state.post.comments.findIndex((c) => c.id === comment.id);
+          if (commentIndex !== -1) {
+            state.post.commentsCount--;
+            state.post.comments.splice(commentIndex, 1);
           }
         }
       })

@@ -21,6 +21,16 @@ export const getProfileFeed = (userId) => {
   });
 };
 
+export const getPost = (postId) => {
+  return new Promise((resolve, reject) => {
+    axios.get(`/api/posts/${postId}`).then((res) => {
+      resolve(res.data);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+};
+
 export const newPost = (content = null, image = null) => {
   return new Promise((resolve, reject) => {
     const data = new FormData();

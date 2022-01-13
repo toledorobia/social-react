@@ -2,35 +2,54 @@ import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 
 const theme = extendTheme({
+  config: {
+    useSystemColorMode: false,
+    initialColorMode: "dark",
+  },
   fonts: {
     heading: "Lato",
     body: "Lato",
   },
   styles: {
-    global: {
+    global: (props) => ({
       body: {
+        bg: mode("white", "gray.700")(props),
         pt: { base: "0", md: "0" },
       },
-    },
+    }),
   },
   components: {
+    Box: {
+      variants: {
+        body: (props) => ({ // real body color
+          bg: mode("white", "gray.700")(props),
+        }),
+      },
+    },
+    VStack: {
+      variants: {
+        post: (props) => ({
+          bg: mode("white", "white")(props),
+        }),
+      },
+    },
     Button: {
       // defaultProps: {
       //   colorScheme: "blue",
       // },
       variants: {
-        primary: () => ({
-          bg: "blue.400",
+        primary: (props) => ({
+          bg: mode("blue.400", "blue.600")(props),
           color: "white",
           _hover: {
-            bg: "blue.500",
+            bg: mode("blue.500", "blue.700")(props),
           },
         }),
-        secondary: () => ({
-          bg: "gray.500",
+        secondary: (props) => ({
+          bg: mode("gray.500", "gray.500")(props),
           color: "white",
           _hover: {
-            bg: "gray.600",
+            bg: mode("gray.600", "gray.600")(props),
           },
         }),
       },

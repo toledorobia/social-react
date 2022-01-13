@@ -1,24 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { VStack, useColorModeValue } from "@chakra-ui/react";
+// import { VStack } from "@chakra-ui/react";
 import PostContent from "./PostContent";
 import PostHeader from "./PostHeader";
 import PostSocial from "./PostSocial";
 
 const Post = ({ post, showAll }) => {
-  const bg = useColorModeValue("white", "gray.700");
-  const bgHover = useColorModeValue("white", "gray.700");
+  // const bg = useColorModeValue("white", "gray.700");
+  // const bgHover = useColorModeValue("white", "gray.700");
 
   return (
     <>
       <VStack
-        bg={bg}
+        variant="post"
+
+        bg={useColorModeValue("white", "gray.700")}
         _hover={{
-          bg: bgHover,
-          borderColor: "gray.400",
+          bg: useColorModeValue("white", "gray.700"),
         }}
-        // borderWidth="1px"
-        // borderColor="gray.300"
         rounded="lg"
         alignItems="stretch"
         shadow="base"

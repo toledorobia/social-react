@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Button, useBoolean } from "@chakra-ui/react";
+import { Button, useBoolean, useColorModeValue } from "@chakra-ui/react";
 import { MdFavorite } from "react-icons/md";
 import { toggleLike } from "../../features/posts/postsSlice";
 
@@ -33,7 +33,7 @@ const PostSocialLike = ({ postId, likes }) => {
         variant="ghost"
         size="sm"
         flex={1}
-        color={isLike ? "blue.600" : "gray.600"}
+        color={isLike ? useColorModeValue("blue.500", "blue.400") : useColorModeValue("gray.600", "gray.400")}
       >
         {isLike ? "Unlike" : "Like"}
       </Button>

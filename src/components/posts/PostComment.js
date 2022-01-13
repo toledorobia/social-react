@@ -25,8 +25,8 @@ const PostComment = ({ postId, comment }) => {
   const dispatch = useDispatch();
   const toast = useToast();
   const user = useSelector((state) => state.auth.user);
-  const bg = useColorModeValue("gray.200", "gray.700");
   const [loading, setLoading] = useBoolean(false);
+  const optionsColor = useColorModeValue("gray.600", "gray.400");
 
   const ownComment = user && user.uid === comment.uid;
   const isLike = comment.likes.find((l) => l.uid === user.uid) != null;
@@ -83,7 +83,7 @@ const PostComment = ({ postId, comment }) => {
             spacing={0}
             alignItems="start"
             borderRadius="lg"
-            bg={bg}
+            bg={useColorModeValue("gray.200", "gray.600")}
             px={3}
             py={2}
           >
@@ -103,11 +103,11 @@ const PostComment = ({ postId, comment }) => {
               onClick={handleCommentLike}
               fontWeight="bold"
               fontSize="xs"
-              color="gray.600"
+              color={optionsColor}
             >
               {isLike ? "Unlike" : "Like"}
             </Link>
-            <Text fontSize="xs" color="gray.600">
+            <Text fontSize="xs" color={optionsColor}>
               &bull;
             </Text>
             {ownComment && (
@@ -119,11 +119,11 @@ const PostComment = ({ postId, comment }) => {
                   onConfirm={handleCommentDelete}
                   fontWeight="bold"
                   fontSize="xs"
-                  color="gray.600"
+                  color={optionsColor}
                 >
                   Delete
                 </LinkConfirm>
-                <Text fontSize="xs" color="gray.600">
+                <Text fontSize="xs" color={optionsColor}>
                   &bull;
                 </Text>
               </>
@@ -131,18 +131,17 @@ const PostComment = ({ postId, comment }) => {
 
             <Link
               fontSize="xs"
-              color="gray.600"
+              color={optionsColor}
               title={dateFormat(comment.createdAt)}
             >
               {dateFromNow(comment.createdAt)}
             </Link>
             <Spacer />
-            <Icon as={MdFavorite} color="gray.600" boxSize="0.8em" />
+            <Icon as={MdFavorite} color={optionsColor} boxSize="0.8em" />
             <PostLikesList
               likes={comment.likes}
               fontSize="xs"
               fontWeight="bold"
-              color="grey.600"
             />
           </HStack>
         </VStack>

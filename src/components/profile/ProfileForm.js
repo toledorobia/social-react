@@ -14,6 +14,7 @@ import {
   EditableInput,
   VisuallyHiddenInput,
   useToast,
+  useColorModeValue,
 } from "@chakra-ui/react";
 
 import { FiEdit2 } from "react-icons/fi";
@@ -98,7 +99,7 @@ const ProfileForm = () => {
     <>
       <VStack
         spacing={4}
-        bg="white"
+        bg={useColorModeValue("white", "gray.700")}
         rounded="lg"
         shadow="base"
         alignItems="stretch"
@@ -123,6 +124,7 @@ const ProfileForm = () => {
             alignSelf={{ base: "center", md: "left" }}
             top="-30px"
             borderWidth="4px"
+            borderColor={useColorModeValue("white", "gray.700")}
           >
             <AvatarBadge
               as={IconButton}
@@ -131,7 +133,10 @@ const ProfileForm = () => {
               size="sm"
               rounded="full"
               top="-5px"
-              colorScheme="blue"
+              bg={useColorModeValue("blue.400", "blue.500")}
+              _hover={{
+                bg: useColorModeValue("blue.500", "blue.600"),
+              }}
               aria-label="Change photo"
               _loading={{
                 opacity: 1,

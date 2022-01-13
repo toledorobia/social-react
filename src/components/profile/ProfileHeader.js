@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Stack, Text, VStack, Avatar, Image, Link } from "@chakra-ui/react";
+import { Stack, Text, VStack, Avatar, Image, Link, useColorModeValue } from "@chakra-ui/react";
 import { publicUrl, dateFormat } from "../../libs/helpers";
 
 const ProfileHeader = ({ user }) => {
@@ -8,7 +8,7 @@ const ProfileHeader = ({ user }) => {
     <>
       <VStack
         spacing={4}
-        bg="white"
+        bg={useColorModeValue("white", "gray.700")}
         rounded="lg"
         shadow="base"
         alignItems="stretch"
@@ -33,6 +33,7 @@ const ProfileHeader = ({ user }) => {
             alignSelf={{ base: "center", md: "left" }}
             top="-30px"
             borderWidth="4px"
+            borderColor={useColorModeValue("white", "gray.700")}
           ></Avatar>
 
           <VStack

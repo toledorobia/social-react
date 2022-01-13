@@ -27,7 +27,7 @@ const SideBar = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+    <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.800")}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
@@ -118,7 +118,7 @@ const NavItem = ({ to, onClick, icon, children, ...rest }) => {
             role="group"
             cursor="pointer"
             _hover={{
-              bg: "blue.400",
+              bg: useColorModeValue("gray.100", "gray.700"),
               color: "white",
             }}
             {...rest}
@@ -151,7 +151,7 @@ const NavItem = ({ to, onClick, icon, children, ...rest }) => {
           role="group"
           cursor="pointer"
           _hover={{
-            bg: "blue.400",
+            bg: useColorModeValue("blue.400", "blue.600"),
             color: "white",
           }}
           {...rest}

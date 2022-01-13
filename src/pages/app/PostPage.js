@@ -9,6 +9,8 @@ import { isEmptyString } from "../../libs/helpers";
 import NotFoundPage from "../common/NotFoundPage";
 import LoadingPage from "../common/LoadingPage";
 
+import { getPost } from "../../features/posts/postsSlice";
+
 const PostPage = () => {
   const params = useParams();
   const dispatch = useDispatch();
@@ -22,16 +24,9 @@ const PostPage = () => {
       return;
     }
 
-    // const unsubscribe = snapshotPost(
-    //   params.id,
-    //   (posts) => {
-    //     setLoaded(true);
-    //     dispatch(setPost(posts));
-    //   },
-    //   (error) => {
-    //     console.log("snapshotPost error", error);
-    //   }
-    // );
+    dispatch(getPost(params.id)).unwrap().then(() => {
+      setLoaded(true);
+    });
 
     window.scrollTo({
       top: 0,
