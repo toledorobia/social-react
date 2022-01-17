@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase/firestore";
 import { compress } from "image-conversion";
 import _ from "lodash";
 import cryptojs from "crypto-js";
@@ -25,52 +24,8 @@ export const publicUrl = (path) => {
   return process.env.PUBLIC_URL + path;
 };
 
-export const firebaseClearUser = (fbuser) => {
-  if (fbuser == null) {
-    return null;
-  }
-
-  return {
-    uid: fbuser.uid,
-    email: fbuser.email,
-    displayName: fbuser.displayName,
-    photoURL: fbuser.photoURL,
-    phoneNumber: fbuser.phoneNumber,
-  };
-};
-
-export const firebaseClearError = (error) => {
-  return error == null ? null : { code: error.code, message: error.message };
-};
-
-export const firebaseTimestampToDates = (doc) => {
-  if (isSomething(doc.createdAt)) {
-    doc.createdAt = doc.createdAt.toDate();
-  }
-
-  if (isSomething(doc.updateAt)) {
-    doc.updateAt = doc.updateAt.toDate();
-  }
-
-  return doc;
-};
-
-export const firebaseDocToObject = (doc, extraData = {}) => {
-  if (doc == null) {
-    return null;
-  }
-
-  const d = firebaseTimestampToDates(doc.data());
-  const id = doc.id;
-  return { ...d, ...extraData, id };
-};
-
 export const randomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-export const firebaseDateNow = () => {
-  return Timestamp.fromDate(new Date());
 };
 
 export const isEmptyString = (str) => {

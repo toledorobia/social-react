@@ -10,7 +10,6 @@ import "./index.scss";
 import App from "./App";
 
 import theme from "./theme/chakra.theme";
-import "./firebase";
 import store from "./store";
 
 ReactDOM.render(

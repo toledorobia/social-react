@@ -16,7 +16,11 @@ import {
   VStack,
   DrawerContent,
   Text,
+  Switch,
+  FormControl,
+  FormLabel,
   useDisclosure,
+  useColorMode,
 } from "@chakra-ui/react";
 
 import { FiHome, FiMenu, FiLogOut, FiUser } from "react-icons/fi";
@@ -59,6 +63,7 @@ SideBar.propTypes = {
 };
 
 const SidebarContent = ({ onClose, ...rest }) => {
+  const { colorMode, toggleColorMode } = useColorMode();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -96,6 +101,12 @@ const SidebarContent = ({ onClose, ...rest }) => {
       <NavItem onClick={handleSignOut} key="Sign Out" icon={FiLogOut}>
         Sign Out
       </NavItem>
+      <FormControl display='flex' alignItems='center' p="4" mx="4">
+        <FormLabel htmlFor='email-alerts' mb='0'>
+          Dark Mode
+        </FormLabel>
+        <Switch colorScheme="dark" isChecked={colorMode == 'dark'} onChange={toggleColorMode} />
+      </FormControl>
     </Box>
   );
 };
@@ -118,7 +129,7 @@ const NavItem = ({ to, onClick, icon, children, ...rest }) => {
             role="group"
             cursor="pointer"
             _hover={{
-              bg: useColorModeValue("gray.100", "gray.700"),
+              bg: useColorModeValue("gray.400", "gray.700"),
               color: "white",
             }}
             {...rest}
