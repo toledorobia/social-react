@@ -28,8 +28,8 @@ const PostComment = ({ postId, comment }) => {
   const [loading, setLoading] = useBoolean(false);
   const optionsColor = useColorModeValue("gray.600", "gray.400");
 
-  const ownComment = user && user.uid === comment.uid;
-  const isLike = comment.likes.find((l) => l.uid === user.uid) != null;
+  const ownComment = user && user.id === comment.user.id;
+  const isLike = comment.likes.find((l) => l.user._id === user.id) != null;
 
   const handleCommentLike = useCallback(async () => {
     if (loading) {

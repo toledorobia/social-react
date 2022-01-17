@@ -105,7 +105,7 @@ const ProfileForm = () => {
         alignItems="stretch"
       >
         <Image
-          src={publicUrl("cover.jpg")}
+          src={publicUrl("/cover.jpg")}
           borderTopRadius="lg"
           objectFit="cover"
           maxH={200}

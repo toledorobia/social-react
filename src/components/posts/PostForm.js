@@ -167,7 +167,7 @@ const PostForm = () => {
                 }}
                 _empty={{
                   _before: {
-                    content: '"What\'s on your mind, Jonathan?"',
+                    content: '"What\'s on your mind, ' + user.name + '?"',
                     color: "gray.500",
                     cursor: "text",
                   },
@@ -257,7 +257,7 @@ const PostForm = () => {
             onClick={onPostClick}
             variant="filled"
             borderRadius="full"
-            placeholder="What's on your mind, Jonathan?"
+            placeholder={`What's on your mind, ${user.name}?`}
           />
         </HStack>
       </VStack>
